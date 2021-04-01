@@ -114,4 +114,5 @@ dmypy.json
 .pyre/
 
 .idea/
-
+*.secret
+password.txt
