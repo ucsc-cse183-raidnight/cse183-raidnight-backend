@@ -114,5 +114,6 @@ dmypy.json
 .pyre/
 
 .idea/
-*.secret
+*/.service
 password.txt
+apps/_default/static/
