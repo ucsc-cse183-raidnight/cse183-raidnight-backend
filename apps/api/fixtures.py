@@ -81,29 +81,30 @@ db.define_table(
 )
 
 # ==== PRESETS ====
-db.define_table(
-    'game_presets',
-    Field('name', 'string', notnull=True, length=128),
-    Field('description', 'text', length=2048)
-    # 1->X: game_preset_roles
-    # 1->X: game_preset_rules
-)
-
-db.define_table(
-    'game_preset_roles',
-    Field('preset_id', 'reference game_presets', notnull=True),
-    Field('name', 'string', notnull=True, length=128),
-    Field('parent_id', 'reference game_preset_roles'),
-    Field('icon', 'string', length=128)
-)
-
-db.define_table(
-    'game_preset_rules',
-    Field('preset_id', 'reference game_presets', notnull=True),
-    Field('role_id', 'reference game_preset_roles', notnull=True),
-    Field('rule_type', 'string', notnull=True, length=64),
-    Field('rule_operator', 'string', length=64),
-    Field('rule_value', 'integer')
-)
+# If we ever choose to make presets data-driven rather than using presets.py, these are the required tables.
+# db.define_table(
+#     'game_presets',
+#     Field('name', 'string', notnull=True, length=128),
+#     Field('description', 'text', length=2048)
+#     # 1->X: game_preset_roles
+#     # 1->X: game_preset_rules
+# )
+#
+# db.define_table(
+#     'game_preset_roles',
+#     Field('preset_id', 'reference game_presets', notnull=True),
+#     Field('name', 'string', notnull=True, length=128),
+#     Field('parent_id', 'reference game_preset_roles'),
+#     Field('icon', 'string', length=128)
+# )
+#
+# db.define_table(
+#     'game_preset_rules',
+#     Field('preset_id', 'reference game_presets', notnull=True),
+#     Field('role_id', 'reference game_preset_roles', notnull=True),
+#     Field('rule_type', 'string', notnull=True, length=64),
+#     Field('rule_operator', 'string', length=64),
+#     Field('rule_value', 'integer')
+# )
 
 db.commit()
