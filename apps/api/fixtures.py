@@ -34,6 +34,23 @@ db.define_table(
 )
 
 db.define_table(
+    'game_roles',
+    Field('session_id', 'reference game_sessions', notnull=True),
+    Field('name', 'string', notnull=True, length=128),
+    Field('parent_id', 'reference game_roles'),
+    Field('icon', 'string', length=128)
+)
+
+db.define_table(
+    'game_rules',
+    Field('session_id', 'reference game_sessions', notnull=True),
+    Field('role_id', 'reference game_roles', notnull=True),
+    Field('rule_type', 'string', notnull=True, length=64),
+    Field('rule_operator', 'string', length=64),
+    Field('rule_value', 'integer')
+)
+
+db.define_table(
     'game_signups',
     Field('user_id', 'reference auth_user', notnull=False),  # if null, anonymous_name must be not null
     Field('anonymous_name', 'string', length=128),  # mutex user_id
@@ -61,23 +78,6 @@ db.define_table(
     'game_invites',
     Field('session_id', 'reference game_sessions', notnull=True),
     Field('key', 'string', notnull=True, length=128)
-)
-
-db.define_table(
-    'game_roles',
-    Field('session_id', 'reference game_sessions', notnull=True),
-    Field('name', 'string', notnull=True, length=128),
-    Field('parent_id', 'reference game_roles'),
-    Field('icon', 'string', length=128)
-)
-
-db.define_table(
-    'game_rules',
-    Field('session_id', 'reference game_sessions', notnull=True),
-    Field('role_id', 'reference game_roles', notnull=True),
-    Field('rule_type', 'string', notnull=True, length=64),
-    Field('rule_operator', 'string', length=64),
-    Field('rule_value', 'integer')
 )
 
 # ==== PRESETS ====
