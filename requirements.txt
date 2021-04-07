@@ -1,1 +1,2 @@
 git+https://github.com/web2py/py4web.git
+pydal~=20210215.1

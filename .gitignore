@@ -116,4 +116,4 @@ dmypy.json
 .idea/
 */.service
 password.txt
-apps/_default/static/
+db/
