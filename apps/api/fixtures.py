@@ -18,6 +18,7 @@ session = Session(secret='my secret key')  # todo load secret from env var
 auth = Auth(session, db)
 auth.enable()
 
+# ==== GAME ====
 db.define_table(
     'game_sessions',  # not to be confused with sessions, the user kind
     Field('name', 'string', length=128, notnull=True),
@@ -50,9 +51,59 @@ db.define_table(
 )
 
 db.define_table(
+    'game_signup_roles',
+    Field('signup_id', 'reference game_signups', notnull=True),
+    Field('role_id', 'reference game_roles', notnull=True),
+    Field('weight', 'integer', notnull=True)
+)
+
+db.define_table(
     'game_invites',
     Field('session_id', 'reference game_sessions', notnull=True),
     Field('key', 'string', notnull=True, length=128)
+)
+
+db.define_table(
+    'game_roles',
+    Field('session_id', 'reference game_sessions', notnull=True),
+    Field('name', 'string', notnull=True, length=128),
+    Field('parent_id', 'reference game_roles'),
+    Field('icon', 'string', length=128)
+)
+
+db.define_table(
+    'game_rules',
+    Field('session_id', 'reference game_sessions', notnull=True),
+    Field('role_id', 'reference game_roles', notnull=True),
+    Field('rule_type', 'string', notnull=True, length=64),
+    Field('rule_operator', 'string', length=64),
+    Field('rule_value', 'integer')
+)
+
+# ==== PRESETS ====
+db.define_table(
+    'game_presets',
+    Field('name', 'string', notnull=True, length=128),
+    Field('description', 'text', length=2048)
+    # 1->X: game_preset_roles
+    # 1->X: game_preset_rules
+)
+
+db.define_table(
+    'game_preset_roles',
+    Field('preset_id', 'reference game_presets', notnull=True),
+    Field('name', 'string', notnull=True, length=128),
+    Field('parent_id', 'reference game_preset_roles'),
+    Field('icon', 'string', length=128)
+)
+
+db.define_table(
+    'game_preset_rules',
+    Field('preset_id', 'reference game_presets', notnull=True),
+    Field('role_id', 'reference game_preset_roles', notnull=True),
+    Field('rule_type', 'string', notnull=True, length=64),
+    Field('rule_operator', 'string', length=64),
+    Field('rule_value', 'integer')
 )
 
 db.commit()
