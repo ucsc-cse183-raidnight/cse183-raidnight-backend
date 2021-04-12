@@ -25,8 +25,7 @@ class PresetRole:
 @dataclass
 class PresetRule:
     role: PresetRole
-    rule_type: str
-    rule_operator: Optional[str] = None
+    rule_operator: str
     rule_value: Optional[int] = None
 
 

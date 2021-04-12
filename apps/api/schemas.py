@@ -1,24 +1,66 @@
-from typing import Optional
+from __future__ import annotations
 
-from pydantic import BaseModel, confloat, constr
+import enum
+from typing import List, Optional, Union
 
-
-# ==== GameSession ====
-class GameSessionBase(BaseModel):
-    name: constr(max_length=128)
-    description: Optional[constr(max_length=2048)]
-    selected_time_offset: Optional[confloat(ge=0, le=168)]
-    selected_time_duration: Optional[confloat(ge=0, le=168)]
-    selected_time_timezone: Optional[constr(max_length=512)]
+from pydantic import BaseModel, FilePath, confloat, constr, stricturl
 
 
-class GameSessionCreate(GameSessionBase):
-    pass
+# ==== API ====
+# ---- Sessions ----
+class RuleOperator(str, enum.Enum):
+    EQ = 'eq'  # =
+    GE = 'ge'  # >=
+    GT = 'gt'  # >
+    LE = 'le'  # <=
+    LT = 'lt'  # <
+    MUTEX = 'mutex'  # NOT a AND b
 
 
-class GameSession(GameSessionBase):
-    id: int
-    owner_id: Optional[int]
+class SessionRule(BaseModel):
+    operator: RuleOperator
+    value: int
 
-    class Config:
-        orm_mode = True
+
+class SessionRole(BaseModel):
+    name: constr(strip_whitespace=True, max_length=128)
+    rules: Optional[List[SessionRule]]
+    icon: Optional[Union[
+        stricturl(allowed_schemes={'http', 'https'}, max_length=512),
+        FilePath
+    ]]
+    children: Optional[List[SessionRole]]
+
+
+class CreateSession(BaseModel):
+    name: constr(strip_whitespace=True, max_length=128)
+    description: Optional[constr(strip_whitespace=True, max_length=2048)]
+    roles: List[SessionRole]
+
+
+# EditSession = CreateSession
+
+class SelectSessionTime(BaseModel):
+    offset: confloat(ge=0, le=168)
+    duration: confloat(ge=0, le=168)
+    timezone: constr(strip_whitespace=True, max_length=512)
+
+
+# ---- Signups ----
+class SignupTime(BaseModel):
+    offset: confloat(ge=0, le=168)
+    duration: confloat(ge=0, le=168)
+    timezone: constr(strip_whitespace=True, max_length=512)
+
+
+class SignupRole(BaseModel):
+    role_id: int
+    weight: int
+
+
+class CreateSignup(BaseModel):
+    anonymous_name: Optional[constr(strip_whitespace=True, max_length=128)]
+    times: List[SignupTime]
+    roles: List[SignupRole]
+
+# EditSignup = CreateSignup

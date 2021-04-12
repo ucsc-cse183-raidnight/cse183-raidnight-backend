@@ -38,15 +38,14 @@ db.define_table(
     Field('session_id', 'reference game_sessions', notnull=True),
     Field('name', 'string', notnull=True, length=128),
     Field('parent_id', 'reference game_roles'),
-    Field('icon', 'string', length=128)
+    Field('icon', 'string', length=512)
 )
 
 db.define_table(
     'game_rules',
     Field('session_id', 'reference game_sessions', notnull=True),
     Field('role_id', 'reference game_roles', notnull=True),
-    Field('rule_type', 'string', notnull=True, length=64),
-    Field('rule_operator', 'string', length=64),
+    Field('rule_operator', 'string', notnull=True, length=64),
     Field('rule_value', 'integer')
 )
 
