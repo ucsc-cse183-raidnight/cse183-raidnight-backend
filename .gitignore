@@ -113,6 +113,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# py4web scaffolding
+# apps/_dashboard  # todo uncomment later
+apps/_scaffold
+
 .idea/
 */.service
 password.txt
