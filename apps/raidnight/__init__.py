@@ -1,2 +1,2 @@
 from . import controllers
-from .fixtures import db
+from .fixtures import db, auth

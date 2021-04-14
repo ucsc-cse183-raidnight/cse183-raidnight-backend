@@ -7,7 +7,7 @@ from .fixtures import auth, db, session
 @action.uses("index.html", db, session, auth)
 def index():
     user = auth.get_user()
-    return dict(message="Hello {first_name}".format(**user) if user else "Hello")
+    return dict(message="Hello {first_name}".format(**user) if user else "Hello", user=user)
 
 
 @action('hello')
