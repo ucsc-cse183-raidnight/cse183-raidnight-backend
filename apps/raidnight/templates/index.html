@@ -1,9 +1,10 @@
 [[extend 'layout.html']]
 
-<div class="section">
+<div class="section" style="margin-top: 50px">
   <div class="vars">
       [[=message]]
   </div>
+    [[if globals().get('user'):]]
     <div class="session">
         <div class="title">
             <h1 class="title is-size-2">Session</h1>
@@ -64,5 +65,14 @@
 
         </div>
     </div>
+
+    [[else:]]
+    <div>
+        <p>introduction</p>
+    </div>
+    [[pass]]
+
+
+
 
 </div>
