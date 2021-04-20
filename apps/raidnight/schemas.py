@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, FilePath, confloat, constr, stricturl
 
 
-# ==== API ====
+# ==== Input ====
 # ---- Sessions ----
 class RuleOperator(str, enum.Enum):
     EQ = 'eq'  # =
@@ -20,6 +20,10 @@ class RuleOperator(str, enum.Enum):
 class SessionRule(BaseModel):
     operator: RuleOperator
     value: int
+
+
+class SessionRuleWithRole(SessionRule):
+    role_id: int
 
 
 class SessionRole(BaseModel):
@@ -38,7 +42,11 @@ class CreateSession(BaseModel):
     roles: List[SessionRole]
 
 
-# EditSession = CreateSession
+class EditSession(BaseModel):
+    name: constr(strip_whitespace=True, max_length=128)
+    description: Optional[constr(strip_whitespace=True, max_length=2048)]
+    rules: List[SessionRuleWithRole]
+
 
 class SelectSessionTime(BaseModel):
     offset: confloat(ge=0, le=168)

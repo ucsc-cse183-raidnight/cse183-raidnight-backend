@@ -12,12 +12,14 @@ import os
 from py4web import DAL, Session
 from py4web.utils.auth import Auth
 from py4web.utils.auth_plugins import OAuth2
+from py4web.utils.url_signer import URLSigner
 
 from . import config
 
 DB_FOLDER = os.path.join(os.path.dirname(__file__), '../../db')
 db = DAL('sqlite://dev.db', folder=DB_FOLDER, pool_size=1)  # todo
 session = Session(secret=config.SESSION_SECRET)
+url_signer = URLSigner(session)
 
 ########
 # Auth #
