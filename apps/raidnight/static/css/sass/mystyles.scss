@@ -4,7 +4,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap');
 
 
-$font:  "Source Sans Pro", sans-serif;
+$font: "Source Sans Pro", sans-serif;
 $background: #1e2025;
 $purple: #603fff;
 //$block: #8d7ffe;
@@ -37,19 +37,23 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 section {
   background-color: $block;
 }
+
 .button.is-grey-white {
   background-color: white;
   border-radius: 12px;
   height: 30px;
   color: $bright-purple;
 }
+
 .footer {
   padding: 1rem;
   background-color: $block;
 }
+
 //navbar {
 //  background-color: $primary;
 //}
@@ -59,12 +63,13 @@ section {
   height: 3.7rem;
 }
 
-.navbar-brand{
-  height: 50px;
-}
-.navbar-item{
+//.navbar-brand{
+//  height: 50px;
+//}
+.navbar-item {
   color: white;
 }
+
 body > footer {
   margin-top: auto;
 }
@@ -73,16 +78,19 @@ body > footer {
   color: $purple
 }
 
-.session{
+.session {
   margin: 30px;
 }
-div.title{
+
+div.title {
   margin: 10px 70px 10px;
 
 }
+
 .blocks {
   margin: 50px 100px 20px;
 }
+
 .block {
   background-color: $block;
   margin: 10px 0px 10px;
