@@ -1,0 +1,101 @@
+@charset "utf-8";
+
+// Import a Google Font
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap');
+
+
+$font:  "Source Sans Pro", sans-serif;
+$background: #1e2025;
+$purple: #603fff;
+//$block: #8d7ffe;
+$block: #31343a;
+//block:#5a5e68;
+$text: #dadbdb;
+$button: #603fff;
+$grey-light: #dadbdb;
+$bright-purple: #8169ff;
+$primary: $purple;
+
+// Import only what you need from Bulma
+@import "../bulma/sass/utilities/_all.sass";
+@import "../bulma/sass/base/_all.sass";
+@import "../bulma/sass/elements/button.sass";
+@import "../bulma/sass/elements/container.sass";
+@import "../bulma/sass/elements/title.sass";
+@import "../bulma/sass/form/_all.sass";
+@import "../bulma/sass/components/navbar.sass";
+@import "../bulma/sass/layout/hero.sass";
+@import "../bulma/sass/layout/section.sass";
+
+
+body {
+  font-family: $font;
+  color: $text;
+  background-color: $background;
+  //height: 500px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+section {
+  background-color: $block;
+}
+.button.is-grey-white {
+  background-color: white;
+  border-radius: 12px;
+  height: 30px;
+  color: $bright-purple;
+}
+.footer {
+  padding: 1rem;
+  background-color: $block;
+}
+//navbar {
+//  background-color: $primary;
+//}
+.navbar.is-purple {
+  background-color: $bright-purple;
+  color: #fff;
+  height: 3.7rem;
+}
+
+.navbar-brand{
+  height: 50px;
+}
+.navbar-item{
+  color: white;
+}
+body > footer {
+  margin-top: auto;
+}
+
+.title {
+  color: $purple
+}
+
+.session{
+  margin: 30px;
+}
+div.title{
+  margin: 10px 70px 10px;
+
+}
+.blocks {
+  margin: 50px 100px 20px;
+}
+.block {
+  background-color: $block;
+  margin: 10px 0px 10px;
+  padding: 30px 20px 35px 55px;
+  border-radius: 40px;
+
+}
+
+span.tag {
+  padding: 10px;
+  width: 80px;
+  height: 30px;
+  border-radius: 3px;
+  background-color: $background;
+  color: grey;
+}

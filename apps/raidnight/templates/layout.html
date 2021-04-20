@@ -6,15 +6,18 @@
     <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAAQEAAAEAIAAwAAAAFgAAACgAAAABAAAAAgAAAAEAIAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAAAAAA=="/>
     <link rel="stylesheet" href="css/bulma.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="../static/css/mystyles.css">
+
     <style>.py4web-validation-error{margin-top:-16px; font-size:0.8em;color:red}</style>
     [[block page_head]]<!-- individual pages can customize header here -->[[end]]
   </head>
   <body>
     <!-- Navigation bar -->
-    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+    <nav class="navbar is-fixed-top is-purple" role="navigation" aria-label="main navigation">
+
       <div class="navbar-brand">
         <a class="navbar-item" href="[[=URL('index')]]">
-          Learn py4web
+          <b>Raidnight</b>
           <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
         </a>
 
@@ -41,12 +44,12 @@
                     [[=globals()['user'].get('username')]]
                   </a>
                   <div class="navbar-dropdown">
-                    <a class="navbar-item" href="[[=URL('auth/logout')]]">Logout</a>
+                    <a class="navbar-item" href="[[=URL('auth/logout')]]"><b>Logout</b></a>
                     <!-- <a class="navbar-item" href="[[=URL('auth/profile')]]">Profile</a> -->
                   </div>
                 </div>
               [[else:]]
-                <a class="button is-success" href="[[=URL('auth/plugin/oauth2discord/login')]]">Log in with Discord</a>
+                <a class="button is-grey-white" href="[[=URL('auth/plugin/oauth2discord/login')]]"><b>Log in with Discord</b></a>
               [[pass]]
             </div>
           </div>
