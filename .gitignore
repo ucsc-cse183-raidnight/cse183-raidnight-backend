@@ -121,3 +121,5 @@ apps/_scaffold
 */.service
 password.txt
 db/
+
+.DS_Store
