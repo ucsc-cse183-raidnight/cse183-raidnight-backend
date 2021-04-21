@@ -12,12 +12,12 @@
             <h1 class="title is-size-2">Session</h1>
         </div>
         <div class="blocks">
-
+            [[for session in owned_sessions:]]
             <div class="block">
                 <div class="columns">
                     <div class="column is-four-fifths">
                         <h1 class="subtitle">Name</h1>
-                        <p>description</p>
+                        <p>[[=session.description]]</p>
                         <p>presets</p>
                         <p>time</p>
                         <p>role</p>
@@ -29,6 +29,7 @@
                     </div>
                 </div>
             </div>
+            [[pass]]
 
             <div class="block">
                 <div class="columns">
