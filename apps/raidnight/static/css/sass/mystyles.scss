@@ -16,17 +16,11 @@ $grey-light: #dadbdb;
 $bright-purple: #8169ff;
 $primary: $purple;
 
-// Import only what you need from Bulma
-@import "../bulma/sass/utilities/_all.sass";
-@import "../bulma/sass/base/_all.sass";
-@import "../bulma/sass/elements/button.sass";
-@import "../bulma/sass/elements/container.sass";
-@import "../bulma/sass/elements/title.sass";
-@import "../bulma/sass/form/_all.sass";
-@import "../bulma/sass/components/navbar.sass";
-@import "../bulma/sass/layout/hero.sass";
-@import "../bulma/sass/layout/section.sass";
+$scheme-main: $background;
 
+@import "../bulma/bulma.sass";
+
+$navbar-height: 3.7rem;
 
 body {
   font-family: $font;
@@ -60,7 +54,7 @@ section {
 .navbar.is-purple {
   background-color: $bright-purple;
   color: #fff;
-  height: 3.7rem;
+  height: $navbar-height;
 }
 
 //.navbar-brand{
@@ -106,4 +100,8 @@ span.tag {
   border-radius: 3px;
   background-color: $background;
   color: grey;
+}
+
+.fill-viewport {
+  min-height: 100vh;
 }

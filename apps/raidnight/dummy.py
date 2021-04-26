@@ -15,13 +15,15 @@ def objectify(d):
     return o
 
 
+lipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
 session1 = objectify({
     'id': 1, 'name': 'Test Session', 'description': 'Some Description', 'owner_id': 1, 'selected_time_offset': None,
     'selected_time_duration': None, 'selected_time_timezone': None
 })
 
 session2 = objectify({
-    'id': 2, 'name': 'Test 2', 'description': 'This is on my alt', 'owner_id': 2, 'selected_time_offset': None,
+    'id': 2, 'name': 'Test 2', 'description': lipsum, 'owner_id': 2, 'selected_time_offset': None,
     'selected_time_duration': None, 'selected_time_timezone': None
 })
 

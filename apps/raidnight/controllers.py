@@ -73,6 +73,6 @@ def invite(invite_key):
     #     abort(404, "Invalid invite")
     # game_session = db.game_sessions[game_invite.session_id]
     # build the page with the session the invite points to
-    return {"user": user, "session": dummy.session2}
+    return {"user": user, "session": dummy.session2, "url_signer": url_signer}
 
 # ==== API ====
