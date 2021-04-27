@@ -77,7 +77,7 @@ def edit_signup(session_id, signup_id):
 def join_session(session_id):
     """after user confirm @ invite - verify join action, create signup, then redir to edit signup"""
     user = get_user()  # may not exist if anonymous - check query for anonymous name
-    query = request.get_vars()
+    query = request.query
 
     # if user is not logged in and name is not passed to qstring, abort
     if not (user or query.get('name')):
