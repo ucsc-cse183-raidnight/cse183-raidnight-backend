@@ -76,7 +76,35 @@ def edit_signup(session_id, signup_id):
 @action.uses(db, session, auth, url_signer.verify())
 def join_session(session_id):
     """after user confirm @ invite - verify join action, create signup, then redir to edit signup"""
-    return {"user": auth.get_user()}
+    user = get_user()  # may not exist if anonymous - check query for anonymous name
+    query = request.get_vars()
+
+    # if user is not logged in and name is not passed to qstring, abort
+    if not (user or query.get('name')):
+        abort(400, "Expected login or name")
+
+    # get game session
+    game_session = db.game_sessions[session_id]
+    if game_session is None:
+        abort(404, "Game session not found")
+
+    # check if there's already a signup (if so, redir to edit)
+    if user:
+        existing_signup = db(db.game_signups.session_id == session_id,
+                             db.game_signups.user_id == user.id).select().first()
+    else:
+        existing_signup = db(db.game_signups.session_id == session_id,
+                             db.game_signups.anonymous_name == query['name']).select().first()
+
+    if existing_signup is not None:
+        redirect(URL(f"sessions/{session_id}/edit_signup/{existing_signup.id}"))
+
+    # create a new signup and redir to edit
+    if user:
+        new_signup_id = db.game_signups.insert(session_id=session_id, user_id=user.id)
+    else:
+        new_signup_id = db.game_signups.insert(session_id=session_id, anonymous_name=query['name'])
+    redirect(URL(f"sessions/{session_id}/edit_signup/{new_signup_id}"))
 
 
 @action('invite/<invite_key>')
