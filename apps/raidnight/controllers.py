@@ -1,24 +1,25 @@
-from py4web import abort, action
+from py4web import URL, abort, action, redirect, request
 
 from . import dummy
 from .fixtures import auth, db, session, url_signer
+from .utils import get_user
 
 
 # ==== pages ====
 @action("index")
 @action.uses("index.html", db, session, auth)
 def index():
-    user = auth.get_user()
+    user = get_user()
     owned_sessions = None
     signed_up_sessions = None
 
-    if user:
-        owned_sessions = list(db(db.game_sessions.owner_id == user['id']).select())
+    if user is not None:
+        owned_sessions = list(db(db.game_sessions.owner_id == user.id).select())
         signed_up_sessions = []
 
-        for signup in db(db.game_signups.user_id == user['id']).iterselect():
+        for signup in db(db.game_signups.user_id == user.id).iterselect():
             game_session = db.game_sessions[signup.session_id]
-            if game_session.owner_id != user['id']:  # if we own the session, it's already in owned_sessions
+            if game_session.owner_id != user.id:  # if we own the session, it's already in owned_sessions
                 signed_up_sessions.append(game_session)
 
         # todo remove me: dummy data
@@ -36,31 +37,39 @@ def index():
 @action('sessions/new')
 @action.uses("sessions/new.html", db, session, auth)
 def create_session():
-    return {"user": auth.get_user()}
+    return {"user": get_user()}
 
 
 @action('sessions/<session_id:int>')
 @action.uses("sessions/view.html", db, session, auth)
 def view_session(session_id):
-    return {"user": auth.get_user()}
+    return {"user": get_user()}
 
 
 @action('sessions/<session_id:int>/edit')
 @action.uses("sessions/edit.html", db, session, auth)
 def edit_session(session_id):
     # user must have permission to edit session, session must exist
-    # user = auth.get_user()
+    # user = get_user()
     # game_session = db.game_sessions[session_id]
-    # if game_session is None or game_session.owner_id != user.get('id'):
+    # if game_session is None or game_session.owner_id != user.id:
     #     abort(404, "Session not found")
     # return {"user": user, "session": game_session}
-    return {"user": auth.get_user(), "session": dummy.full_session}  # todo uncomment the above to use real data
+    return {"user": get_user(), "session": dummy.full_session}  # todo uncomment the above to use real data
 
 
-@action('sessions/<session_id:int>/edit_signup')
+@action('sessions/<session_id:int>/edit_signup/<signup_id:int>')
 @action.uses("sessions/edit_signup.html", db, session, auth)
-def edit_signup(session_id):
-    return {"user": auth.get_user()}
+def edit_signup(session_id, signup_id):
+    game_session = db.game_sessions[session_id]
+    signup = db.game_signups[signup_id]
+    user = get_user()
+    if game_session is None or signup is None:
+        abort(404, "Signup not found")
+
+    # if the signup is from a user,
+
+    return {"user": user}
 
 
 @action('sessions/<session_id:int>/join')
@@ -73,7 +82,7 @@ def join_session(session_id):
 @action('invite/<invite_key>')
 @action.uses("sessions/invite.html", db, session, auth)
 def invite(invite_key):
-    user = auth.get_user()
+    user = get_user()
     # get the invite with the corresponding key
     # game_invite = db(db.game_invites.key == invite_key).select().first()
     # if game_invite is None:
@@ -82,7 +91,7 @@ def invite(invite_key):
     # existing_signup = None
     # if user:
     #     existing_signup = db(db.game_signups.session_id == game_invite.session_id,
-    #                          db.game_signups.user_id == user['id']).select().first()
+    #                          db.game_signups.user_id == user.id).select().first()
     # return {
     #     "user": user,
     #     "url_signer": url_signer,
@@ -106,5 +115,5 @@ def invite(invite_key):
 @action('test/vue')
 @action.uses("test/vue.html", db, session, auth)
 def test_vue():
-    user = auth.get_user()
+    user = get_user()
     return {"user": user}

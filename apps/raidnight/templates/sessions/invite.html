@@ -15,7 +15,7 @@
           </div>
 
           <div class="content">
-            <a href="[[=URL('sessions/{session.id}/edit_signup')]]" class="button is-info">
+            <a href="[[=URL('sessions/{session.id}/edit_signup/{existing_signup.id}')]]" class="button is-info">
               <span>Edit your signup</span>
               <span class="icon is-small">
                 <i class="fas fa-arrow-right"></i>
@@ -35,7 +35,7 @@
             [[if user:]]
             <!-- If logged in, display a join as (user) here -->
             <a href="[[=signed_join]]" class="button is-info">
-              <span>Join as [[=user['username'] ]]</span>
+              <span>Join as [[=user.username ]]</span>
               <span class="icon is-small">
                 <i class="fas fa-arrow-right"></i>
               </span>

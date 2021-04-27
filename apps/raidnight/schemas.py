@@ -14,7 +14,6 @@ class RuleOperator(str, enum.Enum):
     GT = 'gt'  # >
     LE = 'le'  # <=
     LT = 'lt'  # <
-    MUTEX = 'mutex'  # NOT a AND b
 
 
 class SessionRule(BaseModel):
@@ -66,9 +65,6 @@ class SignupRole(BaseModel):
     weight: int
 
 
-class CreateSignup(BaseModel):
-    anonymous_name: Optional[constr(strip_whitespace=True, max_length=128)]
+class EditSignup(BaseModel):
     times: List[SignupTime]
     roles: List[SignupRole]
-
-# EditSignup = CreateSignup
