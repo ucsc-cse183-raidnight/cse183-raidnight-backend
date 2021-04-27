@@ -75,4 +75,13 @@ def invite(invite_key):
     # build the page with the session the invite points to
     return {"user": user, "session": dummy.session2, "url_signer": url_signer}
 
+
 # ==== API ====
+
+# ==== dev test ====
+# todo remove me
+@action('test/vue')
+@action.uses("test/vue.html", db, session, auth)
+def test_vue():
+    user = auth.get_user()
+    return {"user": user}

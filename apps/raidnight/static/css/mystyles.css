@@ -10199,6 +10199,10 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
   padding: 3rem 1.5rem 6rem;
 }
 
+.navbar-offset {
+  margin-top: 3.7rem;
+}
+
 body {
   font-family: "Source Sans Pro", sans-serif;
   color: #dadbdb;

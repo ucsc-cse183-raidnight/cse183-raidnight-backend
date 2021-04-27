@@ -22,6 +22,10 @@ $scheme-main: $background;
 
 $navbar-height: 3.7rem;
 
+.navbar-offset {
+  margin-top: $navbar-height;
+}
+
 body {
   font-family: $font;
   color: $text;
