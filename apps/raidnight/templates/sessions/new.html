@@ -1,0 +1,184 @@
+[[extend 'layout.html']]
+
+<!------- Templates ------->
+[[block page_head]]
+<!-- Role Tree -->
+<script type="text/x-template" id="role-tree-template">
+  <div class="role-tree">
+    <role-tree-item
+     v-for="role of roles"
+     :role="role">
+    </role-tree-item>
+  </div>
+</script>
+
+<!-- Role Tree Item -->
+<script type="text/x-template" id="role-tree-item-template">
+  <div class="role-tree-item">
+
+    <div class="level m-0">
+      <div class="level-left">
+
+        <!-- role image -->
+        <div class="level-item">
+          <figure class="image is-64x64">
+            <img v-bind:src="role.icon || 'img/noclass.png'">
+          </figure>
+        </div>
+
+        <!-- role name, rules (stacked) -->
+        <div class="level-item">
+          <div class="has-text-centered-mobile"> <!-- used to stack these vertically -->
+            <p class="subtitle">
+              {{role.name}}
+            </p>
+            <div class="tags">
+              <rule-tag
+               v-for="rule of role.rules"
+               :rule="rule"></rule-tag>
+
+              <span class="tag is-primary is-clickable">
+                +
+              </span>
+
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- </level-left> -->
+      <div class="level-right has-text-centered-mobile">
+        <button
+         class="button is-primary is-small"
+         @click="addSubrole(role)"
+         v-if="role.children?.length == 0">
+          Add Subroles
+        </button>
+      </div>
+    </div> <!-- </level> -->
+
+    {{role.children}}
+
+    <div class="ml-5" v-if="role.children?.length > 0">
+      <role-tree
+       :roles="role.children">
+      </role-tree>
+    </div>
+
+  </div> <!-- </role-tree-item> -->
+</script>
+
+<!-- Rule Tag -->
+<script type="text/x-template" id="rule-tag-template">
+  <span class="tag is-primary">
+    {{niceOperator}} {{rule.value}}
+    <button class="delete is-small"></button>
+  </span>
+</script>
+[[end]]
+
+<!--
+ ██████╗ ██████╗ ███╗   ██╗████████╗███████╗███╗   ██╗████████╗
+██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝
+██║     ██║   ██║██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║   ██║
+██║     ██║   ██║██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║   ██║
+╚██████╗╚██████╔╝██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝
+
+Did I put a massive comment here because it was too hard to tell where the content started? Maybe.
+-->
+
+<div class="container my-6">
+  <h1 class="title">Create a Session</h1>
+  <h2 class="subtitle">
+    Make a weekly recurring event and invite some players to find the best layout of times and roles.
+  </h2>
+</div>
+
+<div class="container" id="vue">
+  <div>
+    Session name goes here (2-way binding)
+  </div>
+
+  <div>
+    Session description goes here (2-way binding)
+  </div>
+
+  <div>
+    Preset options go here (onselect events fill out role-tree)
+  </div>
+
+  <div>
+    Roles and rules go here
+  </div>
+
+  <div class="mt-6">
+    <p>this is role-tree prototyping, remove me later</p>
+
+    <role-tree
+     :roles="roles">
+    </role-tree>
+
+  </div>
+</div>
+
+<!--
+██╗   ██╗██╗   ██╗███████╗
+██║   ██║██║   ██║██╔════╝
+██║   ██║██║   ██║█████╗
+╚██╗ ██╔╝██║   ██║██╔══╝
+ ╚████╔╝ ╚██████╔╝███████╗
+  ╚═══╝   ╚═════╝ ╚══════╝
+
+Look, it's easy to get lost in the code.
+-->
+<script>
+  // setup app
+  const app = Vue.createApp({
+    data() {
+      return {roles: [{name: 'Healer', rules: [{operator: 'ge', value: 2}], icon: 'img/healer.png', children: []}]};
+    }
+  });
+
+  // define components
+  app.component('role-tree', {
+    template: '#role-tree-template',
+    props: ['roles']
+  });
+
+  app.component('role-tree-item', {
+    template: '#role-tree-item-template',
+    props: ['role'],
+    methods: {
+      addSubrole(role) {
+        if (!role.children) role.children = [];
+        role.children.push({name: 'New Role', rules: [], icon: null, children: []})
+      }
+    }
+  });
+
+  app.component('rule-tag', {
+    template: '#rule-tag-template',
+    props: ['rule'],
+    computed: {
+      niceOperator() {
+        switch (this.rule.operator) {
+          case 'eq':
+            return 'EXACTLY';
+          case 'ge':
+            return 'MIN';
+          case 'gt':
+            return 'MORE THAN';
+          case 'le':
+            return 'MAX';
+          case 'lt':
+            return 'LESS THAN';
+          default:
+            return this.rule.operator.toUpperCase();
+        }
+      }
+    }
+  });
+
+  // mount to the page
+  app.mount('#vue');
+</script>

@@ -97,15 +97,6 @@ div.title {
 
 }
 
-span.tag {
-  padding: 10px;
-  width: 80px;
-  height: 30px;
-  border-radius: 3px;
-  background-color: $background;
-  color: grey;
-}
-
 .fill-viewport {
   min-height: calc(100vh - #{$navbar-height});
 }
