@@ -10275,7 +10275,7 @@ span.tag {
 }
 
 .fill-viewport {
-  min-height: 100vh;
+  min-height: calc(100vh - 3.7rem);
 }
 
 /*# sourceMappingURL=mystyles.css.map */

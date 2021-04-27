@@ -57,9 +57,16 @@ def edit_session(session_id):
     return {"user": auth.get_user(), "session": dummy.full_session}  # todo uncomment the above to use real data
 
 
+@action('sessions/<session_id:int>/edit_signup')
+@action.uses("sessions/edit_signup.html", db, session, auth)
+def edit_signup(session_id):
+    return {"user": auth.get_user()}
+
+
 @action('sessions/<session_id:int>/join')
-@action.uses("sessions/join.html", db, session, auth, url_signer.verify())
+@action.uses(db, session, auth, url_signer.verify())
 def join_session(session_id):
+    """after user confirm @ invite - verify join action, create signup, then redir to edit signup"""
     return {"user": auth.get_user()}
 
 
@@ -72,8 +79,24 @@ def invite(invite_key):
     # if game_invite is None:
     #     abort(404, "Invalid invite")
     # game_session = db.game_sessions[game_invite.session_id]
+    # existing_signup = None
+    # if user:
+    #     existing_signup = db(db.game_signups.session_id == game_invite.session_id,
+    #                          db.game_signups.user_id == user['id']).select().first()
+    # return {
+    #     "user": user,
+    #     "url_signer": url_signer,
+    #     "session": game_session,
+    #     "existing_signup": existing_signup
+    # }
+
     # build the page with the session the invite points to
-    return {"user": user, "session": dummy.session2, "url_signer": url_signer}
+    return {
+        "user": user,
+        "url_signer": url_signer,
+        "session": dummy.session2,
+        "existing_signup": False
+    }
 
 
 # ==== API ====
