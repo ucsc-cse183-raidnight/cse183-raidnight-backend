@@ -67,9 +67,12 @@ def edit_signup(session_id, signup_id):
     if game_session is None or signup is None:
         abort(404, "Signup not found")
 
-    # if the signup is from a user,
+    # if the signup is from a user, make sure that that user is the current user
+    if signup.user_id is not None and user != signup.user_id:
+        abort(403, "You are not allowed to edit this user's signups")
 
-    return {"user": user}
+    # user is good, serve the page
+    return {"user": user, "signup": signup, "session": game_session}
 
 
 @action('sessions/<session_id:int>/join')
@@ -132,7 +135,7 @@ def invite(invite_key):
         "user": user,
         "url_signer": url_signer,
         "session": dummy.session2,
-        "existing_signup": False
+        "existing_signup": None  # dummy.objectify({'id': 2})
     }
 
 

@@ -8,6 +8,9 @@ class DiscordUser(BaseModel):
     email: str
     avatar_hash: str
 
+    def __eq__(self, other):
+        return self.id == other
+
 
 def get_user():
     """Gets the user as a Pydantic model instead of a dict. Returns None if no user is logged in."""
