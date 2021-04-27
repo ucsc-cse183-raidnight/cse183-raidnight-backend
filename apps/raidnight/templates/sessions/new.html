@@ -49,14 +49,12 @@
       <div class="level-right has-text-centered-mobile">
         <button
          class="button is-primary is-small"
-         @click="addSubrole(role)"
+         @click="addSubrole"
          v-if="role.children?.length == 0">
           Add Subroles
         </button>
       </div>
     </div> <!-- </level> -->
-
-    {{role.children}}
 
     <div class="ml-5" v-if="role.children?.length > 0">
       <role-tree
@@ -149,9 +147,9 @@ Look, it's easy to get lost in the code.
     template: '#role-tree-item-template',
     props: ['role'],
     methods: {
-      addSubrole(role) {
-        if (!role.children) role.children = [];
-        role.children.push({name: 'New Role', rules: [], icon: null, children: []})
+      addSubrole() {
+        if (!this.role.children) this.role.children = [];
+        this.role.children.push({name: 'New Role', rules: [], icon: null, children: []})
       }
     }
   });
