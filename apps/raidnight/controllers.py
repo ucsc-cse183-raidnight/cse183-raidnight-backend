@@ -25,11 +25,12 @@ def index():
         owned_sessions.append(dummy.session1)
         signed_up_sessions.append(dummy.session2)
         signed_up_sessions.append(dummy.full_session)
-
+        sessions
     return {
         "user": user,
         "signed_up_sessions": signed_up_sessions,
-        "owned_sessions": owned_sessions
+        "owned_sessions": owned_sessions,
+        "sessions": sessions,
     }
 
 

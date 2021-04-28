@@ -12,15 +12,15 @@
             <h1 class="title is-size-2">Session</h1>
         </div>
         <div class="blocks">
-            [[for session in owned_sessions:]]
+
+            [[for session in sessions:]]
             <div class="block">
                 <div class="columns">
                     <div class="column is-four-fifths">
-                        <h1 class="subtitle">Name</h1>
-                        <p>[[=session.description]]</p>
-                        <p>presets</p>
-                        <p>time</p>
-                        <p>role</p>
+                        <h1 class="subtitle">Name: [[=session.name]]</h1>
+                        <p>Description: [[=session.description]]</p>
+                        <p>time: [[=session.selected_time_offset]] duration: [[=session.selected_time_duration]] time zone: [[=session.selected_time_timezone]]</p>
+
                     </div>
                     <div class="column" style="padding-left: 80px">
                         <span class="tag is-size-6">
