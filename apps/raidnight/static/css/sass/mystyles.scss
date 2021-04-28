@@ -3,7 +3,7 @@
 // Import a Google Font
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap');
 
-
+// theme config
 $font: "Source Sans Pro", sans-serif;
 $background: #1e2025;
 $purple: #603fff;
@@ -17,6 +17,9 @@ $bright-purple: #8169ff;
 $primary: $purple;
 
 $scheme-main: $background;
+
+// component config
+$input-color: $grey-light;
 
 @import "../bulma/bulma.sass";
 

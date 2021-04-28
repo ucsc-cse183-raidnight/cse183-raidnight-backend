@@ -5,10 +5,32 @@
 <!-- Role Tree -->
 <script type="text/x-template" id="role-tree-template">
   <div class="role-tree">
+    <!-- Tree items -->
     <role-tree-item
      v-for="role of roles"
-     :role="role">
+     :role="role"
+     @delete="deleteRole(role)">
     </role-tree-item>
+    <!-- add new role -->
+    <div class="role-tree-item">
+      <div class="level m-0 is-mobile">
+        <div class="level-left">
+          <div class="level-item image is-64x64">
+            <button class="button is-primary"
+                    @click="addRole">
+              <span class="icon">
+                <i class="fas fa-plus"></i>
+              </span>
+            </button>
+          </div>
+          <div class="level-item">
+            <p class="subtitle">
+              Add Role
+            </p>
+          </div>
+        </div> <!-- </level-left> -->
+      </div> <!-- </level> -->
+    </div> <!-- </role-tree-item> -->
   </div>
 </script>
 
@@ -16,7 +38,7 @@
 <script type="text/x-template" id="role-tree-item-template">
   <div class="role-tree-item">
 
-    <div class="level m-0">
+    <div class="level m-0 is-mobile">
       <div class="level-left">
 
         <!-- role image -->
@@ -27,12 +49,23 @@
         </div>
 
         <!-- role name, rules (stacked) -->
-        <div class="level-item">
-          <div class="has-text-centered-mobile"> <!-- used to stack these vertically -->
-            <p class="subtitle">
-              {{role.name}}
+        <div class="level-item" v-if="!isEditing">
+          <div> <!-- used to stack these vertically -->
+            <!-- Name -->
+            <p>
+              <span class="subtitle mr-1">{{role.name}}</span>
+              <span class="icon is-clickable"
+                    @click="isEditing = true">
+                <i class="fas fa-edit"></i>
+              </span>
             </p>
+
+            <!-- Rules -->
             <div class="tags">
+              <span class="tag">
+                Rules:
+              </span>
+
               <rule-tag
                v-for="rule of role.rules"
                :rule="rule"></rule-tag>
@@ -40,20 +73,41 @@
               <span class="tag is-primary is-clickable">
                 +
               </span>
-
             </div>
           </div>
         </div>
 
+        <!-- Name/Image Editor -->
+        <div class="level-item" v-if="isEditing">
+          <div class="mr-1">
+            <div class="field">
+              <input class="input" type="text" placeholder="Role name..." v-model="role.name">
+              <input class="input is-small" type="text" placeholder="Image URL..." v-model="role.icon">
+            </div>
+          </div>
+          <span class="icon is-clickable"
+                @click="isEditing = false">
+            <i class="fas fa-check"></i>
+          </span>
+        </div>
+
       </div> <!-- </level-left> -->
-      <div class="level-right has-text-centered-mobile">
-        <button
-         class="button is-primary is-small"
-         @click="addSubrole"
-         v-if="role.children?.length == 0">
-          Add Subroles
-        </button>
-      </div>
+
+      <div class="level-right">
+        <div class="buttons">
+          <button
+           class="button is-primary is-small"
+           @click="addSubrole"
+           v-if="role.children?.length == 0">
+            Add Subroles
+          </button>
+          <button
+           class="button is-danger is-small"
+           @click="$emit('delete')">
+            Delete
+          </button>
+        </div>
+      </div> <!-- </level-right> -->
     </div> <!-- </level> -->
 
     <div class="ml-5" v-if="role.children?.length > 0">
@@ -113,6 +167,7 @@ Did I put a massive comment here because it was too hard to tell where the conte
     <p>this is role-tree prototyping, remove me later</p>
 
     <role-tree
+     is_root
      :roles="roles">
     </role-tree>
 
@@ -138,14 +193,27 @@ Look, it's easy to get lost in the code.
   });
 
   // define components
+  // ==== role tree ====
   app.component('role-tree', {
     template: '#role-tree-template',
-    props: ['roles']
+    props: ['roles', 'is_root'],
+    methods: {
+      addRole() {
+        this.roles.push({name: 'New Role', rules: [], icon: null, children: []})
+      },
+      deleteRole(role) {
+        this.roles.splice(this.roles.indexOf(role), 1);
+      }
+    }
   });
 
+  // ==== role tree item ====
   app.component('role-tree-item', {
     template: '#role-tree-item-template',
     props: ['role'],
+    data() {
+      return {isEditing: false};
+    },
     methods: {
       addSubrole() {
         if (!this.role.children) this.role.children = [];
@@ -154,6 +222,7 @@ Look, it's easy to get lost in the code.
     }
   });
 
+  // ==== rule tag ====
   app.component('rule-tag', {
     template: '#rule-tag-template',
     props: ['rule'],
@@ -161,15 +230,15 @@ Look, it's easy to get lost in the code.
       niceOperator() {
         switch (this.rule.operator) {
           case 'eq':
-            return 'EXACTLY';
+            return 'Exactly';
           case 'ge':
-            return 'MIN';
+            return 'At least';
           case 'gt':
-            return 'MORE THAN';
+            return 'More than';
           case 'le':
-            return 'MAX';
+            return 'At most';
           case 'lt':
-            return 'LESS THAN';
+            return 'Less than';
           default:
             return this.rule.operator.toUpperCase();
         }
