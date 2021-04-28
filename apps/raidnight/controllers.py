@@ -12,6 +12,7 @@ def index():
     user = get_user()
     owned_sessions = None
     signed_up_sessions = None
+    sessions = []
 
     if user is not None:
         owned_sessions = list(db(db.game_sessions.owner_id == user.id).select())
@@ -26,7 +27,9 @@ def index():
         owned_sessions.append(dummy.session1)
         signed_up_sessions.append(dummy.session2)
         signed_up_sessions.append(dummy.full_session)
-        sessions
+        sessions = owned_sessions + signed_up_sessions
+        sessions = sorted(sessions, key=lambda s: s.id, reverse=True)
+
     return {
         "user": user,
         "signed_up_sessions": signed_up_sessions,
