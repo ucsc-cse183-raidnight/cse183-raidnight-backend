@@ -3,7 +3,7 @@
 // Import a Google Font
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap');
 
-
+// theme config
 $font: "Source Sans Pro", sans-serif;
 $background: #1e2025;
 $purple: #603fff;
@@ -16,17 +16,18 @@ $grey-light: #dadbdb;
 $bright-purple: #8169ff;
 $primary: $purple;
 
-// Import only what you need from Bulma
-@import "../bulma/sass/utilities/_all.sass";
-@import "../bulma/sass/base/_all.sass";
-@import "../bulma/sass/elements/button.sass";
-@import "../bulma/sass/elements/container.sass";
-@import "../bulma/sass/elements/title.sass";
-@import "../bulma/sass/form/_all.sass";
-@import "../bulma/sass/components/navbar.sass";
-@import "../bulma/sass/layout/hero.sass";
-@import "../bulma/sass/layout/section.sass";
+$scheme-main: $background;
 
+// component config
+$input-color: $grey-light;
+
+@import "../bulma/bulma.sass";
+
+$navbar-height: 3.7rem;
+
+.navbar-offset {
+  margin-top: $navbar-height;
+}
 
 body {
   font-family: $font;
@@ -60,7 +61,7 @@ section {
 .navbar.is-purple {
   background-color: $bright-purple;
   color: #fff;
-  height: 3.7rem;
+  height: $navbar-height;
 }
 
 //.navbar-brand{
@@ -99,11 +100,6 @@ div.title {
 
 }
 
-span.tag {
-  padding: 10px;
-  width: 80px;
-  height: 30px;
-  border-radius: 3px;
-  background-color: $background;
-  color: grey;
+.fill-viewport {
+  min-height: calc(100vh - #{$navbar-height});
 }

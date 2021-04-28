@@ -1,0 +1,61 @@
+[[extend 'layout.html']]
+
+<div class="container">
+  <div class="columns is-vcentered fill-viewport">
+    <div class="column is-4"><!-- spacing col to center card --></div>
+    <div class="column is-4">
+      <div class="card has-background-black-ter">
+        <div class="card-content has-text-centered">
+          [[if existing_signup:]]
+          <!-- If the user has already signed up, show link to the signup edit page -->
+          <div class="content">
+            You've already signed up for
+            <p class="title is-4">[[=session.name]]</p>
+            <p class="subtitle is-6">[[=session.description]]</p>
+          </div>
+
+          <div class="content">
+            <a href="[[=URL('sessions/{session.id}/edit_signup/{existing_signup.id}')]]" class="button is-info">
+              <span>Edit your signup</span>
+              <span class="icon is-small">
+                <i class="fas fa-arrow-right"></i>
+              </span>
+            </a>
+          </div>
+          [[else:]]
+          <!-- otherwise show invite details and actions -->
+          <div class="content">
+            You've been invited to
+            <p class="title is-4">[[=session.name]]</p>
+            <p class="subtitle is-6">[[=session.description]]</p>
+          </div>
+
+          <div class="content">
+            [[signed_join=URL(f'sessions/{session.id}/join', signer=url_signer)]]
+            [[if user:]]
+            <!-- If logged in, display a join as (user) here -->
+            <a href="[[=signed_join]]" class="button is-info">
+              <span>Join as [[=user.username ]]</span>
+              <span class="icon is-small">
+                <i class="fas fa-arrow-right"></i>
+              </span>
+            </a>
+            [[else:]]
+            <!-- otherwise join as anonymous or log in -->
+            <p>
+              <a class="button is-info" href="[[=URL('auth/plugin/oauth2discord/login')]]">
+                <span class="icon is-small">
+                  <i class="fab fa-discord"></i>
+                </span>
+                <span>Log in with Discord to join</span>
+              </a>
+            </p>
+            [[pass]]
+          </div>
+          [[pass]]
+        </div>
+      </div>
+    </div>
+    <div class="column is-4"><!-- spacing col to center card --></div>
+  </div>
+</div>
