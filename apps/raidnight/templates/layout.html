@@ -36,6 +36,14 @@
         </div>
 
         <div class="navbar-end">
+          <div class="navbar-item is-hoverable"  title="create">
+            <a class="navbar-item" href="[[=URL('sessions/new')]]">
+              <span class="icon is-large">
+                <i class="fas fa-plus"></i>
+              </span>
+            </a>
+
+          </div>
           <div class="navbar-item">
             [[if globals().get('user'):]]
               <div class="navbar-item has-dropdown is-hoverable">
