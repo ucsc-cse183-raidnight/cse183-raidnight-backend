@@ -144,7 +144,7 @@ def invite(invite_key):
 # ==== dev test ====
 # todo remove me
 @action('test/vue')
-@action.uses("test/vue.html", db, session, auth)
+@action.uses("test/vue2.html", db, session, auth)
 def test_vue():
     user = get_user()
     return {"user": user}
