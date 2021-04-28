@@ -1,0 +1,62 @@
+[[extend 'layout.html']]
+
+[[block page_head]]
+<script type="text/x-template" id="demo-template">
+  <div>
+    Apples: {{apples.n}}
+    <button class="button is-primary" @click="addApples">Add Apple</button>
+    <input class="input"
+           type="text"
+           placeholder="Apples"
+           v-model="apples.n">
+  </div>
+</script>
+[[end]]
+
+<!--
+ ██████╗ ██████╗ ███╗   ██╗████████╗███████╗███╗   ██╗████████╗
+██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝
+██║     ██║   ██║██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║   ██║
+██║     ██║   ██║██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║   ██║
+╚██████╗╚██████╔╝██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝
+
+Did I put a massive comment here because it was too hard to tell where the content started? Maybe.
+-->
+
+<div class="section" id="vue">
+  <demo v-for="apple of apples"
+        :apples="apple">
+  </demo>
+</div>
+
+<!--
+██╗   ██╗██╗   ██╗███████╗
+██║   ██║██║   ██║██╔════╝
+██║   ██║██║   ██║█████╗
+╚██╗ ██╔╝██║   ██║██╔══╝
+ ╚████╔╝ ╚██████╔╝███████╗
+  ╚═══╝   ╚═════╝ ╚══════╝
+
+Look, it's easy to get lost in the code.
+-->
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {apples: [{n: 3}, {n: 1}, {n: 4}, {n: 1}, {n: 5}, {n: 2}, {n: 9}]}
+    }
+  });
+
+  // register components
+  app.component('demo', {
+    template: '#demo-template',
+    props: ['apples'],
+    methods: {
+      addApples() {
+        this.apples.n = (this.apples.n * 2) + 3;
+      }
+    }
+  })
+
+  app.mount('#vue');
+</script>
