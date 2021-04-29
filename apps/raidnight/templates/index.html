@@ -12,25 +12,32 @@
             <h1 class="title is-size-2">Session</h1>
         </div>
         <div class="blocks">
-            [[for session in owned_sessions:]]
+
+            [[for session in sessions:]]
             <div class="block">
                 <div class="columns">
                     <div class="column is-four-fifths">
-                        <h1 class="subtitle">Name</h1>
-                        <p>[[=session.description]]</p>
-                        <p>presets</p>
-                        <p>time</p>
-                        <p>role</p>
+                        <h1 class="subtitle">Name: [[=session.name]]</h1>
+                        <p>Description: [[=session.description]]</p>
+
+
                     </div>
                     <div class="column" style="padding-left: 80px">
+                        [[if session.selected_time_offset:]]
+                        <span class="tag is-size-6">
+                            Assigned
+                        </span>
+                        [[else:]]
                         <span class="tag is-size-6">
                             Awaiting
                         </span>
+                        [[pass]]
                     </div>
                 </div>
             </div>
             [[pass]]
 
+<!--            static-->
             <div class="block">
                 <div class="columns">
                     <div class="column is-four-fifths">
