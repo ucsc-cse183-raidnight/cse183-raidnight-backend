@@ -18,3 +18,8 @@ def get_user():
     if not user:
         return None
     return DiscordUser(id=user['id'], username=user['username'], email=user['email'], avatar_hash=user['last_name'])
+
+
+# ---- api utils ----
+def success(data):
+    return {"success": True, "data": data}

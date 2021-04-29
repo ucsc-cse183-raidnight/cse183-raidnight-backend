@@ -14,12 +14,25 @@ class Preset:
     roles: List[PresetRole] = field(default_factory=list)
     rules: List[PresetRule] = field(default_factory=list)
 
+    def to_vue_dict(self):
+        roles_with_rules = [r.to_vue_dict() for r in self.roles]
+        role_lookup = {}
+        for role in traverse(roles_with_rules):
+            role_lookup[role['name']] = role
+        for rule in self.rules:
+            role_lookup[rule.role.name]['rules'].append(rule.to_vue_dict())
+        return {"name": self.name, "description": self.description, "roles": roles_with_rules}
+
 
 @dataclass
 class PresetRole:
     name: str
     icon: Optional[str] = None
     children: List[PresetRole] = field(default_factory=list)
+
+    def to_vue_dict(self):
+        children = [r.to_vue_dict() for r in self.children]
+        return {"name": self.name, "rules": [], "icon": self.icon, "children": children}
 
 
 @dataclass
@@ -28,35 +41,38 @@ class PresetRule:
     rule_operator: str
     rule_value: Optional[int] = None
 
+    def to_vue_dict(self):
+        return {"operator": self.rule_operator, "value": self.rule_value}
+
 
 DEFAULT_ROLES = [
-    tank := PresetRole(name="Tank", icon="api/static/img/tank.png", children=[
-        paladin := PresetRole(name="Paladin", icon="api/static/img/paladin.png"),
-        warrior := PresetRole(name="Warrior", icon="api/static/img/warrior.png"),
-        dark_knight := PresetRole(name="Dark Knight", icon="api/static/img/darkknight.png"),
-        gunbreaker := PresetRole(name="Gunbreaker", icon="api/static/img/gunbreaker.png")
+    tank := PresetRole(name="Tank", icon="img/tank.png", children=[
+        paladin := PresetRole(name="Paladin", icon="img/paladin.png"),
+        warrior := PresetRole(name="Warrior", icon="img/warrior.png"),
+        dark_knight := PresetRole(name="Dark Knight", icon="img/darkknight.png"),
+        gunbreaker := PresetRole(name="Gunbreaker", icon="img/gunbreaker.png")
     ]),
-    healer := PresetRole(name="Healer", icon="api/static/img/healer.png", children=[
-        white_mage := PresetRole(name="White Mage", icon="api/static/img/whitemage.png"),
-        scholar := PresetRole(name="Scholar", icon="api/static/img/scholar.png"),
-        astrologian := PresetRole(name="Astrologian", icon="api/static/img/astrologian.png")
+    healer := PresetRole(name="Healer", icon="img/healer.png", children=[
+        white_mage := PresetRole(name="White Mage", icon="img/whitemage.png"),
+        scholar := PresetRole(name="Scholar", icon="img/scholar.png"),
+        astrologian := PresetRole(name="Astrologian", icon="img/astrologian.png")
     ]),
-    dps := PresetRole(name="DPS", icon="api/static/img/dps.png", children=[
-        melee := PresetRole(name="Melee DPS", icon="api/static/img/melee.png", children=[
-            monk := PresetRole(name="Monk", icon="api/static/img/monk.png"),
-            dragoon := PresetRole(name="Dragoon", icon="api/static/img/dragoon.png"),
-            ninja := PresetRole(name="Ninja", icon="api/static/img/ninja.png"),
-            samurai := PresetRole(name="Samurai", icon="api/static/img/samurai.png")
+    dps := PresetRole(name="DPS", icon="img/dps.png", children=[
+        melee := PresetRole(name="Melee DPS", icon="img/melee.png", children=[
+            monk := PresetRole(name="Monk", icon="img/monk.png"),
+            dragoon := PresetRole(name="Dragoon", icon="img/dragoon.png"),
+            ninja := PresetRole(name="Ninja", icon="img/ninja.png"),
+            samurai := PresetRole(name="Samurai", icon="img/samurai.png")
         ]),
-        pranged := PresetRole(name="Physical Ranged DPS", icon="api/static/img/pranged.png", children=[
-            bard := PresetRole(name="Bard", icon="api/static/img/bard.png"),
-            machinist := PresetRole(name="Machinist", icon="api/static/img/machinist.png"),
-            dancer := PresetRole(name="Dancer", icon="api/static/img/dancer.png")
+        pranged := PresetRole(name="Physical Ranged DPS", icon="img/pranged.png", children=[
+            bard := PresetRole(name="Bard", icon="img/bard.png"),
+            machinist := PresetRole(name="Machinist", icon="img/machinist.png"),
+            dancer := PresetRole(name="Dancer", icon="img/dancer.png")
         ]),
-        caster := PresetRole(name="Magic Ranged DPS", icon="api/static/img/caster.png", children=[
-            black_mage := PresetRole(name="Black Mage", icon="api/static/img/blackmage.png"),
-            summoner := PresetRole(name="Summoner", icon="api/static/img/summoner.png"),
-            red_mage := PresetRole(name="Red Mage", icon="api/static/img/redmage.png")
+        caster := PresetRole(name="Magic Ranged DPS", icon="img/caster.png", children=[
+            black_mage := PresetRole(name="Black Mage", icon="img/blackmage.png"),
+            summoner := PresetRole(name="Summoner", icon="img/summoner.png"),
+            red_mage := PresetRole(name="Red Mage", icon="img/redmage.png")
         ])
     ])
 ]
@@ -124,7 +140,7 @@ dungeon4 = Preset(
 )
 
 # 8-person any
-player = PresetRole(name="Player", icon="api/static/img/noclass.png", children=DEFAULT_ROLES)
+player = PresetRole(name="Player", icon="img/noclass.png", children=DEFAULT_ROLES)
 any8 = Preset(
     name="Any 8",
     description="Any combination of 8 players.",
@@ -153,3 +169,10 @@ alliance24 = Preset(
 )
 
 ALL_PRESETS = [raid8, raid8_1ppj, raid8_strict, dungeon4, any8, any4, alliance24]
+
+
+# ==== utils ====
+def traverse(role_dicts):
+    for role in role_dicts:
+        yield role
+        yield from traverse(role['children'])

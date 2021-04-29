@@ -1,8 +1,8 @@
 from py4web import URL, abort, action, redirect, request
 
-from . import dummy
+from . import dummy, presets
 from .fixtures import auth, db, session, url_signer
-from .utils import get_user
+from .utils import get_user, success
 
 
 # ==== pages ====
@@ -140,6 +140,10 @@ def invite(invite_key):
 
 
 # ==== API ====
+@action('api/presets')
+def get_presets():
+    return success([p.to_vue_dict() for p in presets.ALL_PRESETS])
+
 
 # ==== dev test ====
 # todo remove me

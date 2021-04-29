@@ -7,10 +7,9 @@
 <script type="text/x-template" id="role-tree-template">
   <div class="role-tree">
     <!-- Tree items -->
-    <role-tree-item
-     v-for="role of roles"
-     :role="role"
-     @delete="deleteRole(role)">
+    <role-tree-item v-for="role of roles"
+                    :role="role"
+                    @delete="deleteRole(role)">
     </role-tree-item>
     <!-- add new role -->
     <div class="role-tree-item">
@@ -102,8 +101,8 @@
         <div class="level-item" v-if="isEditing">
           <div class="mr-1">
             <div class="field">
-              <input class="input" type="text" placeholder="Role name..." v-model="role.name">
-              <input class="input is-small" type="text" placeholder="Image URL..." v-model="role.icon">
+              <input class="input" type="text" placeholder="Role name..." maxlength="128" v-model="role.name">
+              <input class="input is-small" type="text" placeholder="Image URL..." maxlength="512" v-model="role.icon">
             </div>
           </div>
           <span class="icon is-clickable"
@@ -165,30 +164,67 @@
 Did I put a massive comment here because it was too hard to tell where the content started? Maybe.
 -->
 
-<div class="container my-6">
+<div class="section">
   <h1 class="title">Create a Session</h1>
   <h2 class="subtitle">
     Make a weekly recurring event and invite some players to find the best layout of times and roles.
   </h2>
 </div>
 
-<div class="container" id="vue">
-  <div>
-    Session name goes here (2-way binding)
+<div id="vue">
+  <div class="section">
+    <h4 class="title is-4">Name &amp; Description</h4>
+    <h6 class="subtitle is-6">First, give your session a name and your players some idea what the session is about.</h6>
+
+    <div class="field">
+      <label class="label">Name</label>
+      <div class="control">
+        <input class="input" type="text" placeholder="Session Name..." required maxlength="128" v-model="name">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Description</label>
+      <div class="control">
+        <textarea class="input" type="text" placeholder="Description..." maxlength="2048"
+                  v-model="description">
+        </textarea>
+      </div>
+    </div>
   </div>
 
-  <div>
-    Session description goes here (2-way binding)
-  </div>
+  <div class="section">
+    <h4 class="title is-4">Roles &amp; Rules</h4>
+    <h6 class="subtitle is-6">
+      Next, set up the roles and rules to help us find the best role for everyone to play. Not sure what roles to set
+      up? Try one of the presets!
+    </h6>
 
-  <div>
-    Preset options go here (onselect events fill out role-tree)
-  </div>
+    <div class="field is-grouped mb-0">
+      <div class="control">
+        <div class="select">
+          <select v-model="presetBuf">
+            <option disabled>Select a preset...</option>
+            <option v-for="preset of presets" :value="preset">{{preset.name}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="control">
+        <button class="button is-primary" @click="applyPreset">
+          Apply Preset
+        </button>
+      </div>
+      <div class="control">
+        <button class="button is-danger" @click="clearRoles">
+          Clear
+        </button>
+      </div>
+    </div>
+    <p class="help mt-1" v-if="presetBuf">{{presetBuf.description}}</p>
 
-  <div>
-    <role-tree
-     is_root
-     :roles="roles">
+    <role-tree class="mt-5"
+               is_root
+               :roles="roles">
     </role-tree>
   </div>
 </div>
@@ -204,10 +240,32 @@ Did I put a massive comment here because it was too hard to tell where the conte
 Look, it's easy to get lost in the code.
 -->
 <script>
-  // setup app
+  // ==== setup app ====
   const app = Vue.createApp({
     data() {
-      return {roles: [{name: 'Player', rules: [{operator: 'ge', value: 4}], icon: null, children: []}]};
+      return {
+        name: '',
+        description: '',
+        roles: [{name: 'Player', rules: [{operator: 'ge', value: 4}], icon: null, children: []}],
+        presetBuf: null,
+        presets: []
+      };
+    },
+    created() {
+      axios.get("[[=URL('api/presets')]]")
+       .then(response => {
+         if (response.data.success)
+           this.presets.push(...response.data.data)
+       })
+    },
+    methods: {
+      applyPreset() {
+        if (!this.presetBuf) return;
+        this.roles = JSON.parse(JSON.stringify(this.presetBuf.roles));  // isn't deep copying fun?
+      },
+      clearRoles() {
+        this.roles = [];
+      }
     }
   });
 

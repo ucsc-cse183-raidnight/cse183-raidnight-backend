@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, FilePath, confloat, constr, stricturl
+from pydantic import BaseModel, FilePath, confloat, conlist, constr, stricturl
 
 
 # ==== Input ====
@@ -38,7 +38,7 @@ class SessionRole(BaseModel):
 class CreateSession(BaseModel):
     name: constr(strip_whitespace=True, max_length=128)
     description: Optional[constr(strip_whitespace=True, max_length=2048)]
-    roles: List[SessionRole]
+    roles: conlist(SessionRole, min_items=1)
 
 
 class EditSession(BaseModel):
