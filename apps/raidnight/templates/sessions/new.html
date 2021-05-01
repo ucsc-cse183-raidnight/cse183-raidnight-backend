@@ -139,7 +139,7 @@
 
 <!-- Rule Tag -->
 <script type="text/x-template" id="rule-tag-template">
-  <div class="control">
+  <div class="control rule-tag">
     <div class="tags has-addons">
       <span class="tag is-primary">
         {{niceOperator}} {{rule.value}}
@@ -186,8 +186,7 @@ Did I put a massive comment here because it was too hard to tell where the conte
     <div class="field">
       <label class="label">Description</label>
       <div class="control">
-        <textarea class="input" type="text" placeholder="Description..." maxlength="2048"
-                  v-model="description">
+        <textarea class="input" type="text" placeholder="Description..." maxlength="2048" v-model="description">
         </textarea>
       </div>
     </div>
@@ -223,9 +222,25 @@ Did I put a massive comment here because it was too hard to tell where the conte
     <p class="help mt-1" v-if="presetBuf">{{presetBuf.description}}</p>
 
     <role-tree class="mt-5"
-               is_root
                :roles="roles">
     </role-tree>
+  </div>
+
+  <div class="section">
+    <h4 class="title is-4">Finish</h4>
+    <h6 class="subtitle is-6">All set up? Hit the button below to finish creating your session.</h6>
+
+    <p class="has-text-danger has-text-ws-pre-wrap" v-if="errorMsg">{{errorMsg}}</p>
+
+    <button class="button is-primary"
+            v-if="!isLoading"
+            @click="createSession">
+      Create Session
+    </button>
+    <button class="button is-primary is-loading"
+            v-if="isLoading">
+      Loading
+    </button>
   </div>
 </div>
 
@@ -244,11 +259,15 @@ Look, it's easy to get lost in the code.
   const app = Vue.createApp({
     data() {
       return {
+        // session data
         name: '',
         description: '',
         roles: [{name: 'Player', rules: [{operator: 'ge', value: 4}], icon: null, children: []}],
+        // other state
         presetBuf: null,
-        presets: []
+        presets: [],
+        isLoading: false,
+        errorMsg: null
       };
     },
     created() {
@@ -265,6 +284,26 @@ Look, it's easy to get lost in the code.
       },
       clearRoles() {
         this.roles = [];
+      },
+      createSession() {
+        this.isLoading = true;
+        this.errorMsg = '';
+        axios.post("[[=URL('api/sessions')]]", {name: this.name, description: this.description, roles: this.roles})
+         .then(response => {
+           console.log(response);
+           // window.location.href = `[[=URL('sessions')]]/${response.data.data.id}`;
+         })
+         .catch(error => {
+           console.error(error);
+           if (error.response?.data) {
+             this.errorMsg = error.response.data.error;
+           } else {
+             this.errorMsg = "Unknown error, please try again!";
+           }
+         })
+         .then(() => {
+           this.isLoading = false;
+         })
       }
     }
   });
@@ -273,7 +312,7 @@ Look, it's easy to get lost in the code.
   // ==== role tree ====
   app.component('role-tree', {
     template: '#role-tree-template',
-    props: ['roles', 'is_root'],
+    props: ['roles'],
     methods: {
       addRole() {
         this.roles.push({name: 'New Role', rules: [], icon: null, children: []})

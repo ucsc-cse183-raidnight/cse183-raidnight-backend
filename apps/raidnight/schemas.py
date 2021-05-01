@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import enum
+import pathlib
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, FilePath, confloat, conlist, constr, stricturl
+from pydantic import BaseModel, confloat, conlist, constr, stricturl
 
 
 # ==== Input ====
@@ -30,7 +31,7 @@ class SessionRole(BaseModel):
     rules: Optional[List[SessionRule]]
     icon: Optional[Union[
         stricturl(allowed_schemes={'http', 'https'}, max_length=512),
-        FilePath
+        pathlib.Path
     ]]
     children: Optional[List[SessionRole]]
 
@@ -68,3 +69,7 @@ class SignupRole(BaseModel):
 class EditSignup(BaseModel):
     times: List[SignupTime]
     roles: List[SignupRole]
+
+
+# forward refs
+SessionRole.update_forward_refs()

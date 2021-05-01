@@ -1,3 +1,5 @@
+from py4web import response
+
 from .fixtures import auth
 from pydantic import BaseModel
 
@@ -21,5 +23,11 @@ def get_user():
 
 
 # ---- api utils ----
-def success(data):
+def success(data, code=200):
+    response.status = code
     return {"success": True, "data": data}
+
+
+def error(code, reason):
+    response.status = code
+    return {"success": False, "error": reason}

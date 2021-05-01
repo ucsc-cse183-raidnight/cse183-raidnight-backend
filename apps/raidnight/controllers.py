@@ -1,8 +1,9 @@
 from py4web import URL, abort, action, redirect, request
+from pydantic import ValidationError
 
-from . import dummy, presets
+from . import dummy, presets, schemas
 from .fixtures import auth, db, session, url_signer
-from .utils import get_user, success
+from .utils import error, get_user, success
 
 
 # ==== pages ====
@@ -145,8 +146,51 @@ def invite(invite_key):
 
 # ==== API ====
 @action('api/presets')
-def get_presets():
+def api_get_presets():
     return success([p.to_vue_dict() for p in presets.ALL_PRESETS])
+
+
+@action('api/sessions', method=['POST'])
+@action.uses(db, session, auth)
+def api_create_session():
+    user = get_user()
+
+    try:
+        data = request.json
+    except Exception:
+        return error(400, "Could not decode JSON")
+
+    # validate the data
+    try:
+        new_session = schemas.CreateSession.parse_obj(data)
+    except ValidationError as e:
+        return error(422, str(e))
+
+    # write the data to the database
+    owner_id = user.id if user is not None else None
+    session_id = db.game_sessions.insert(name=new_session.name, description=new_session.description, owner_id=owner_id)
+
+    def recursive_insert_role(role, parent_id=None):
+        role_id = db.game_roles.insert(session_id=session_id, name=role.name, parent_id=parent_id, icon=role.icon)
+        for rule in role.rules:
+            db.game_rules.insert(session_id=session_id, role_id=role_id, rule_operator=rule.operator.value,
+                                 rule_value=rule.value)
+        for child in role.children:
+            recursive_insert_role(child, role_id)
+
+    for r in new_session.roles:
+        recursive_insert_role(r)
+
+    return success({"id": session_id})
+
+
+@action('api/sessions', method=['GET'])
+def api_get_session():
+    query = request.query  # .../api/sessions?id=12345&foo=bar&hello=world => {"id": "12345", "foo": "bar", "hello": "world"}
+    session_dict = dummy.full_session.__dict__
+    session_dict['roles'] = [r.to_vue_dict() for r in session_dict['roles']]
+    session_dict['rules'] = [r.to_vue_dict() for r in session_dict['rules']]
+    return success(session_dict)
 
 
 # ==== dev test ====

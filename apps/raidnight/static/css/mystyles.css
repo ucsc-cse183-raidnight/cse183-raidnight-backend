@@ -10269,4 +10269,8 @@ div.title {
   min-height: calc(100vh - 3.7rem);
 }
 
+.has-text-ws-pre-wrap {
+  white-space: pre-wrap;
+}
+
 /*# sourceMappingURL=mystyles.css.map */
