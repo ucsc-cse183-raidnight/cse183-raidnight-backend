@@ -43,7 +43,18 @@ Look, it's easy to get lost in the code.
 <script>
   const app = Vue.createApp({
     data() {
-      return {apples: [{n: 3}, {n: 1}, {n: 4}, {n: 1}, {n: 5}, {n: 2}, {n: 9}]}
+      return {apples: []}
+    },
+    created() {
+      axios.get("[[=URL('test/api/vue')]]")
+       .then(response => {
+         console.log(response)
+         this.apples = response.data.data;
+       })
+       .catch(error => {
+         console.log(error);
+         // this.error = error.reason
+       })
     }
   });
 

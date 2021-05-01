@@ -156,3 +156,8 @@ def get_presets():
 def test_vue():
     user = get_user()
     return {"user": user}
+
+
+@action('test/api/vue')
+def test_vue_ajax():
+    return success([{'n': 5}, {'n': 3}, {'n': 1}, {'n': 500}])
