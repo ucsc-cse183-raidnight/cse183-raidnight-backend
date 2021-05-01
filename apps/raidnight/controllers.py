@@ -97,11 +97,11 @@ def join_session(session_id):
 
     # check if there's already a signup (if so, redir to edit)
     if user:
-        existing_signup = db(db.game_signups.session_id == session_id,
-                             db.game_signups.user_id == user.id).select().first()
+        existing_signup = db(db.game_signups.session_id == session_id
+                             and db.game_signups.user_id == user.id).select().first()
     else:
-        existing_signup = db(db.game_signups.session_id == session_id,
-                             db.game_signups.anonymous_name == query['name']).select().first()
+        existing_signup = db(db.game_signups.session_id == session_id
+                             and db.game_signups.anonymous_name == query['name']).select().first()
 
     if existing_signup is not None:
         redirect(URL(f"sessions/{session_id}/edit_signup/{existing_signup.id}"))
