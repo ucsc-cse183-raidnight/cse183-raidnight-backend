@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from . import dummy, presets, schemas
 from .fixtures import auth, db, session, url_signer
-from .utils import error, get_user, success
+from .utils import error, generate_invite_key, get_game_session_full, get_user, success
 
 
 # ==== pages ====
@@ -54,13 +54,12 @@ def view_session(session_id):
 @action('sessions/<session_id:int>/edit')
 @action.uses("sessions/edit.html", db, session, auth)
 def edit_session(session_id):
-    # user must have permission to edit session, session must exist
+    # user must have permission to edit session, session must exist - pretty much everything here is ajax though
     # user = get_user()
     # game_session = db.game_sessions[session_id]
     # if game_session is None or game_session.owner_id != user.id:
     #     abort(404, "Session not found")
-    # return {"user": user, "session": game_session}
-    return {"user": get_user(), "session": dummy.full_session}  # todo uncomment the above to use real data
+    return {"user": get_user(), "session_id": session_id}
 
 
 @action('sessions/<session_id:int>/edit_signup/<signup_id:int>')
@@ -167,9 +166,11 @@ def api_create_session():
         return error(422, str(e))
 
     # write the data to the database
+    # game session
     owner_id = user.id if user is not None else None
     session_id = db.game_sessions.insert(name=new_session.name, description=new_session.description, owner_id=owner_id)
 
+    # roles/rules
     def recursive_insert_role(role, parent_id=None):
         role_id = db.game_roles.insert(session_id=session_id, name=role.name, parent_id=parent_id, icon=role.icon)
         for rule in role.rules:
@@ -181,16 +182,23 @@ def api_create_session():
     for r in new_session.roles:
         recursive_insert_role(r)
 
-    return success({"id": session_id})
+    # create an invite too
+    invite_key = generate_invite_key()
+    db.game_invites.insert(session_id=session_id, key=invite_key)
+
+    return success({"id": session_id, "invite_key": invite_key})
 
 
-@action('api/sessions', method=['GET'])
-def api_get_session():
-    query = request.query  # .../api/sessions?id=12345&foo=bar&hello=world => {"id": "12345", "foo": "bar", "hello": "world"}
-    session_dict = dummy.full_session.__dict__
-    session_dict['roles'] = [r.to_vue_dict() for r in session_dict['roles']]
-    session_dict['rules'] = [r.to_vue_dict() for r in session_dict['rules']]
-    return success(session_dict)
+@action('api/sessions/<session_id:int>', method=['GET'])
+@action.uses(db, session, auth)
+def api_get_session(session_id):
+    user = get_user()
+    game_session = get_game_session_full(db, session_id)
+    if game_session is None:
+        return error(404, "Session not found")
+    if game_session.owner.id != user.id:
+        return error(403, "You do not have permission to edit this session")
+    return success(game_session.dict())
 
 
 # ==== dev test ====

@@ -73,3 +73,49 @@ class EditSignup(BaseModel):
 
 # forward refs
 SessionRole.update_forward_refs()
+
+
+# ==== Output ====
+class DiscordUser(BaseModel):
+    id: int
+    username: str
+    email: str
+    avatar_hash: str
+
+    def __eq__(self, other):
+        return self.id == other
+
+
+class GameSessionRule(BaseModel):
+    id: int
+    session_id: int
+    role_id: int
+    operator: RuleOperator
+    value: Optional[int]
+
+
+class GameSessionRole(BaseModel):
+    id: int
+    session_id: int
+    name: str
+    parent_id: Optional[int]
+    icon: Optional[str]
+    children: List[GameSessionRole]
+    rules: List[GameSessionRule]
+
+
+class GameSessionFull(BaseModel):
+    id: int
+    name: str
+    description: str
+    owner: DiscordUser
+    selected_time_offset: Optional[float]
+    selected_time_duration: Optional[float]
+    selected_time_timezone: Optional[str]
+    roles: List[GameSessionRole]
+    all_roles: List[GameSessionRole]
+    all_rules: List[GameSessionRule]
+
+
+# forward refs
+GameSessionRole.update_forward_refs()
