@@ -46,24 +46,27 @@ def get_game_session_full(db, session_id):
     all_roles = []
     all_rules = []
 
+    session_role_rows = db(db.game_roles.session_id == session_id).select()
+    session_rule_rows = db(db.game_rules.session_id == session_id).select()
+
     def recursive_load_roles(role_data):
         role_id = role_data.id
         role = GameSessionRole(id=role_id, session_id=session_id, name=role_data.name,
                                parent_id=role_data.parent_id, icon=role_data.icon, children=[], rules=[])
 
-        for rule_data in db(db.game_rules.session_id == session_id and db.game_rules.role_id == role_id).select():
+        for rule_data in session_rule_rows.find(lambda r: r.role_id == role_id):
             rule = GameSessionRule(id=rule_data.id, session_id=session_id, role_id=role_id,
                                    operator=rule_data.rule_operator, value=rule_data.rule_value)
             role.rules.append(rule)
             all_rules.append(rule)
 
-        for child_data in db(db.game_roles.session_id == session_id and db.game_roles.parent_id == role_id).select():
+        for child_data in session_role_rows.find(lambda r: r.parent_id == role_id):
             role.children.append(recursive_load_roles(child_data))
         all_roles.append(role)
         return role
 
     # noinspection PyComparisonWithNone
-    for rd in db(db.game_roles.session_id == session_id and db.game_roles.parent_id == None).select():
+    for rd in session_role_rows.find(lambda r: r.parent_id is None):
         roles.append(recursive_load_roles(rd))
 
     return GameSessionFull(
