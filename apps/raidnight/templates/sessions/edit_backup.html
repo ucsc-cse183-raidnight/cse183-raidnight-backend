@@ -1,9 +1,6 @@
 [[extend 'layout.html']]
 
 <!------- Templates ------->
-[[extend 'layout.html']]
-
-<!------- Templates ------->
 [[block page_head]]
 <link rel="stylesheet" href="css/sessions/new.css">
 <!-- Role Tree -->
@@ -13,7 +10,6 @@
     <role-tree-item v-for="role of roles"
                     :role="role">
     </role-tree-item>
-    <!-- add new role -->
 
   </div>
 </script>
@@ -38,10 +34,7 @@
             <!-- Name -->
             <p>
               <span class="subtitle mr-1">{{role.name}}</span>
-              <span class="icon is-clickable"
-                    @click="isEditing = true">
-                <i class="fas fa-edit"></i>
-              </span>
+
             </p>
 
             <!-- Rules -->
@@ -73,7 +66,7 @@
                   </div>
                   <span class="tag is-success is-clickable"
                         @click="addRule">
-                    +
+                    <b>+</b>
                   </span>
                 </div>
               </div>
@@ -81,50 +74,12 @@
           </div>
         </div>
 
-        <!-- Name/Image Editor -->
-        <div class="level-item" v-if="isEditing">
-          <div class="mr-1">
-            <div class="field">
-              <input class="input" type="text" placeholder="Role name..." maxlength="128" v-model="role.name">
-              <input class="input is-small" type="text" placeholder="Image URL..." maxlength="512" v-model="role.icon">
-            </div>
-          </div>
-          <span class="icon is-clickable"
-                @click="isEditing = false">
-            <i class="fas fa-check"></i>
-          </span>
-        </div>
-
-      </div> <!-- </level-left> -->
-
-<!--      <div class="level-right">-->
-<!--        <div class="buttons">-->
-<!--          <button class="button is-primary is-small"-->
-<!--                  @click="addSubrole"-->
-<!--                  v-if="role.children?.length == 0">-->
-<!--            Add Subroles-->
-<!--          </button>-->
-<!--          <button class="button is-danger is-small"-->
-<!--                  @click="$emit('delete')">-->
-<!--            Delete-->
-<!--          </button>-->
-<!--        </div>-->
-<!--      </div> &lt;!&ndash; </level-right> &ndash;&gt;-->
-
-    </div> <!-- </level> -->
-
-    <!-- Subroles -->
-    <div class="ml-5" v-if="role.children?.length > 0">
-      <role-tree :roles="role.children">
-      </role-tree>
-    </div>
-
   </div> <!-- </role-tree-item> -->
 </script>
 
 <!-- Rule Tag -->
 <script type="text/x-template" id="rule-tag-template">
-  <div class="control rule-tag">
+  <div class="control">
     <div class="tags has-addons">
       <span class="tag is-primary">
         {{niceOperator}} {{rule.value}}
@@ -182,7 +137,14 @@ Did I put a massive comment here because it was too hard to tell where the conte
       You can modify rules for existing roles.
     </h6>
 
+    <h6 class="subtitle is-6">
+      display preset name if there's one?
+    </h6>
+
+
+
     <role-tree class="mt-5"
+               is_root
                :roles="roles">
     </role-tree>
   </div>
@@ -205,18 +167,17 @@ Look, it's easy to get lost in the code.
       return {
         name: '',
         description: '',
-        roles: [],
-
+        roles: [{name: 'Player', rules: [{operator: 'ge', value: 4}], icon: null, children: []}],
+        presetBuf: null,
+        presets: []
       };
     },
     created() {
-      axios.get("[[=URL('api/sessions/1')]]")
+      axios.get("[[=URL('api/sessions/4')]]")
        .then(response => {
          console.log(response);
-         if (response.data.success)
-           this.name = response.data.data.name
-           this.description= response.data.data.description
-           this.roles.push(...response.data.data.roles)
+         // if (response.data.success)
+         //   this.presets.push(...response.data.data)
        })
     },
     methods: {
