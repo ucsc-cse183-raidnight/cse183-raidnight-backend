@@ -55,10 +55,12 @@ def view_session(session_id):
 @action.uses("sessions/edit.html", db, session, auth)
 def edit_session(session_id):
     # user must have permission to edit session, session must exist - pretty much everything here is ajax though
-    # user = get_user()
-    # game_session = db.game_sessions[session_id]
-    # if game_session is None or game_session.owner_id != user.id:
-    #     abort(404, "Session not found")
+    user = get_user()
+    game_session = db.game_sessions[session_id]
+    if game_session is None:
+        abort(404, "Session not found")
+    if game_session.owner_id is not None and user != game_session.owner_id:
+        abort(403, "You do not have permission to edit this session")
     return {"user": get_user(), "session_id": session_id}
 
 
@@ -76,7 +78,7 @@ def edit_signup(session_id, signup_id):
         abort(403, "You are not allowed to edit this user's signups")
 
     # user is good, serve the page
-    return {"user": user, "signup": signup, "session": game_session}
+    return {"user": user, "signup": signup, "session_id": session_id}
 
 
 @action('sessions/<session_id:int>/join')
@@ -134,14 +136,6 @@ def invite(invite_key):
         "existing_signup": existing_signup
     }
 
-    # build the page with the session the invite points to
-    # return {
-    #     "user": user,
-    #     "url_signer": url_signer,
-    #     "session": dummy.session2,
-    #     "existing_signup": None  # dummy.objectify({'id': 2})
-    # }
-
 
 # ==== API ====
 @action('api/presets')
@@ -196,7 +190,7 @@ def api_get_session(session_id):
     game_session = get_game_session_full(db, session_id)
     if game_session is None:
         return error(404, "Session not found")
-    if game_session.owner is not None and game_session.owner.id != user.id:
+    if game_session.owner is not None and user != game_session.owner.id:
         return error(403, "You do not have permission to edit this session")
     return success(game_session.dict())
 
