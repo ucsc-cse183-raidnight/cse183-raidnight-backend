@@ -3,7 +3,7 @@ import secrets
 from py4web import response
 
 from .fixtures import auth
-from .schemas import DiscordUser, GameSessionFull, GameSessionRole, GameSessionRule
+from .schemas import DiscordUser, GameSessionFull, GameSessionInvite, GameSessionRole, GameSessionRule
 
 
 # ---- api utils ----
@@ -68,6 +68,8 @@ def get_game_session_full(db, session_id):
     for rd in session_role_rows.find(lambda r: r.parent_id is None):
         roles.append(recursive_load_roles(rd))
 
+    invite_key = db(db.game_invites.session_id == session_id).select().first().key
+
     return GameSessionFull(
         id=session.id,
         name=session.name,
@@ -78,5 +80,6 @@ def get_game_session_full(db, session_id):
         selected_time_timezone=session.selected_time_timezone,
         roles=roles,
         all_roles=all_roles,
-        all_rules=all_rules
+        all_rules=all_rules,
+        invite_key=invite_key
     )

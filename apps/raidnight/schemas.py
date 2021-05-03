@@ -104,6 +104,12 @@ class GameSessionRole(BaseModel):
     rules: List[GameSessionRule]
 
 
+class GameSessionInvite(BaseModel):
+    id: int
+    session_id: int
+    key: str
+
+
 class GameSessionFull(BaseModel):
     id: int
     name: str
@@ -115,6 +121,7 @@ class GameSessionFull(BaseModel):
     roles: List[GameSessionRole]
     all_roles: List[GameSessionRole]
     all_rules: List[GameSessionRule]
+    invite_key: str
 
 
 # forward refs

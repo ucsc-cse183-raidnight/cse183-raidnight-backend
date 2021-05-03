@@ -97,11 +97,11 @@ def join_session(session_id):
 
     # check if there's already a signup (if so, redir to edit)
     if user:
-        existing_signup = db(db.game_signups.session_id == session_id
-                             and db.game_signups.user_id == user.id).select().first()
+        existing_signup = db((db.game_signups.session_id == session_id)
+                             & (db.game_signups.user_id == user.id)).select().first()
     else:
-        existing_signup = db(db.game_signups.session_id == session_id
-                             and db.game_signups.anonymous_name == query['name']).select().first()
+        existing_signup = db((db.game_signups.session_id == session_id)
+                             & (db.game_signups.anonymous_name == query['name'])).select().first()
 
     if existing_signup is not None:
         redirect(URL(f"sessions/{session_id}/edit_signup/{existing_signup.id}"))
@@ -119,28 +119,28 @@ def join_session(session_id):
 def invite(invite_key):
     user = get_user()
     # get the invite with the corresponding key
-    # game_invite = db(db.game_invites.key == invite_key).select().first()
-    # if game_invite is None:
-    #     abort(404, "Invalid invite")
-    # game_session = db.game_sessions[game_invite.session_id]
-    # existing_signup = None
-    # if user:
-    #     existing_signup = db(db.game_signups.session_id == game_invite.session_id,
-    #                          db.game_signups.user_id == user.id).select().first()
-    # return {
-    #     "user": user,
-    #     "url_signer": url_signer,
-    #     "session": game_session,
-    #     "existing_signup": existing_signup
-    # }
-
-    # build the page with the session the invite points to
+    game_invite = db(db.game_invites.key == invite_key).select().first()
+    if game_invite is None:
+        abort(404, "Invalid invite")
+    game_session = db.game_sessions[game_invite.session_id]
+    existing_signup = None
+    if user:
+        existing_signup = db((db.game_signups.session_id == game_invite.session_id)
+                             & (db.game_signups.user_id == user.id)).select().first()
     return {
         "user": user,
         "url_signer": url_signer,
-        "session": dummy.session2,
-        "existing_signup": None  # dummy.objectify({'id': 2})
+        "session": game_session,
+        "existing_signup": existing_signup
     }
+
+    # build the page with the session the invite points to
+    # return {
+    #     "user": user,
+    #     "url_signer": url_signer,
+    #     "session": dummy.session2,
+    #     "existing_signup": None  # dummy.objectify({'id': 2})
+    # }
 
 
 # ==== API ====
@@ -196,7 +196,7 @@ def api_get_session(session_id):
     game_session = get_game_session_full(db, session_id)
     if game_session is None:
         return error(404, "Session not found")
-    if game_session.owner.id != user.id:
+    if game_session.owner is not None and game_session.owner.id != user.id:
         return error(403, "You do not have permission to edit this session")
     return success(game_session.dict())
 
