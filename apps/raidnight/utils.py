@@ -65,7 +65,6 @@ def get_game_session_full(db, session_id):
         all_roles.append(role)
         return role
 
-    # noinspection PyComparisonWithNone
     for rd in session_role_rows.find(lambda r: r.parent_id is None):
         roles.append(recursive_load_roles(rd))
 
