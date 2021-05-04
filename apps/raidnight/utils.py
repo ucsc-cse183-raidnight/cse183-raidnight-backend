@@ -3,7 +3,8 @@ import secrets
 from py4web import response
 
 from .fixtures import auth
-from .schemas import DiscordUser, GameSessionFull, GameSessionInvite, GameSessionRole, GameSessionRule
+from .schemas import DiscordUser, GameSessionFull, GameSessionRole, GameSessionRule, GameSignupFull, SignupRole, \
+    SignupTime
 
 
 # ---- api utils ----
@@ -30,18 +31,20 @@ def generate_invite_key():
     return secrets.token_urlsafe(5)
 
 
+def get_user_by_id(db, user_id):
+    if user_id is None:
+        return None
+    user_data = db.auth_user[user_id]
+    return DiscordUser(id=user_data.id, username=user_data.username, email=user_data.email,
+                       avatar_hash=user_data.last_name)
+
+
 def get_game_session_full(db, session_id):
     session = db.game_sessions[session_id]
     if session is None:
         return None
 
-    if session.owner_id is not None:
-        owner_data = db.auth_user[session.owner_id]
-        owner = DiscordUser(id=owner_data.id, username=owner_data.username, email=owner_data.email,
-                            avatar_hash=owner_data.last_name)
-    else:
-        owner = None
-
+    owner = get_user_by_id(db, session.owner_id)
     roles = []
     all_roles = []
     all_rules = []
@@ -82,4 +85,27 @@ def get_game_session_full(db, session_id):
         all_roles=all_roles,
         all_rules=all_rules,
         invite_key=invite_key
+    )
+
+
+def get_game_signup_full(db, signup_id):
+    signup = db.game_signups[signup_id]
+    if signup is None:
+        return None
+
+    user = get_user_by_id(db, signup.user_id)
+    times = []
+    roles = []
+
+    for time_data in db(db.game_signup_times.signup_id == signup_id).select():
+        times.append(SignupTime.parse_obj(time_data))
+
+    for role_data in db(db.game_signup_roles.signup_id == signup_id).select():
+        times.append(SignupRole.parse_obj(role_data))
+
+    return GameSignupFull(
+        user=user,
+        anonymous_name=signup.anonymous_name,
+        times=times,
+        roles=roles
     )

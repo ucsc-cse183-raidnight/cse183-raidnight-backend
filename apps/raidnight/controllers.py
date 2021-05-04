@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from . import dummy, presets, schemas
 from .fixtures import auth, db, session, url_signer
-from .utils import error, generate_invite_key, get_game_session_full, get_user, success
+from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, success
 
 
 # ==== pages ====
@@ -191,8 +191,20 @@ def api_get_session(session_id):
     if game_session is None:
         return error(404, "Session not found")
     if game_session.owner is not None and user != game_session.owner.id:
-        return error(403, "You do not have permission to edit this session")
+        return error(403, "You do not have permission to view this session")
     return success(game_session.dict())
+
+
+@action('api/signups/<signup_id:int>', method=['GET'])
+@action.uses(db, session, auth)
+def api_get_signup(signup_id):
+    user = get_user()
+    game_signup = get_game_signup_full(db, signup_id)
+    if game_signup is None:
+        return error(404, "Signup not found")
+    if game_signup.user is not None and user != game_signup.user.id:
+        return error(403, "You do not have permission to view this signup")
+    return success(game_signup.dict())
 
 
 # ==== dev test ====

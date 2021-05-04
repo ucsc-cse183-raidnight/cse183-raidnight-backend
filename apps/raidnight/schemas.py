@@ -86,6 +86,7 @@ class DiscordUser(BaseModel):
         return self.id == other
 
 
+# ---- session ----
 class GameSessionRule(BaseModel):
     id: int
     session_id: int
@@ -114,7 +115,7 @@ class GameSessionFull(BaseModel):
     id: int
     name: str
     description: str
-    owner: DiscordUser
+    owner: Optional[DiscordUser]
     selected_time_offset: Optional[float]
     selected_time_duration: Optional[float]
     selected_time_timezone: Optional[str]
@@ -122,6 +123,12 @@ class GameSessionFull(BaseModel):
     all_roles: List[GameSessionRole]
     all_rules: List[GameSessionRule]
     invite_key: str
+
+
+# ---- signup ----
+class GameSignupFull(EditSignup):
+    user: Optional[DiscordUser]
+    anonymous_name: Optional[str]
 
 
 # forward refs
