@@ -1,1 +1,255 @@
-hello, this is edit signup
+[[extend 'layout.html']]
+
+<!------- Templates ------->
+[[block page_head]]
+<link rel="stylesheet" href="css/sessions/edit_signup.css">
+<!-- Rule Tag -->
+<script type="text/x-template" id="calendar-template">
+  <div class="container">
+    <div class="tile is-ancestor">
+      <!-- left info tile -->
+      <div class="tile is-vertical is-flex-grow-0 mr-1">
+        <div class="calendar-header"><!-- spacer --></div>
+        <div class="calendar-left" v-for="interval of halfHours">
+          <div class="calendar-time-label has-text-centered" v-if="interval % 8 === 4">
+            {{interval / 2}}:00
+          </div>
+        </div>
+      </div>
+      <!-- each day gets a column -->
+      <div class="tile is-vertical" v-for="(day, index) in days">
+        <div class="calendar-header">
+          {{day}}
+        </div>
+        <div class="calendar-cells">
+          <div class="calendar-cell is-clickable"
+               :class="{selected: shouldRenderSelected(index, interval)}"
+               v-for="interval of halfHours"
+               @mousedown.stop.prevent="startSelect(index, interval)"
+               @mouseup.stop.prevent="endSelect(index, interval)"
+               @mouseover="renderSelect(index, interval)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>
+[[end]]
+
+<!--
+ ██████╗ ██████╗ ███╗   ██╗████████╗███████╗███╗   ██╗████████╗
+██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝
+██║     ██║   ██║██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║   ██║
+██║     ██║   ██║██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║   ██║
+╚██████╗╚██████╔╝██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝
+-->
+
+<div id="vue">
+  <!-- Loading -->
+  <div v-if="isLoading">
+    <div class="section">
+      <h1 class="title">Loading...</h1>
+      <progress class="progress is-small is-primary" max="100">15%</progress>
+    </div>
+  </div>
+
+  <!-- main content -->
+  <div v-if="!isLoading">
+    <div class="section">
+      <h1 class="title">Sign up for {{session.name}}</h1>
+      <h2 class="subtitle">
+        Select the times and roles that work best for you.
+      </h2>
+    </div>
+
+    <!-- calendar -->
+    <div class="section">
+      <h4 class="title is-4">Times</h4>
+      <h6 class="subtitle is-6">
+        Choose what times work best for you each week. Times are displayed in the {{timezone}} time zone.
+      </h6>
+
+      <calendar-grid :times="times"
+                     :timezone="timezone">
+      </calendar-grid>
+    </div>
+
+    <!-- roles -->
+    <div class="section">
+      <h4 class="title is-4">Roles</h4>
+      <h6 class="subtitle is-6">Choose which roles you'd like to play.</h6>
+
+      <!-- todo: vue role component -->
+    </div>
+
+    <!-- submit -->
+    <div class="section">
+      <h4 class="title is-4">Finish</h4>
+      <h6 class="subtitle is-6">When you're ready, hit the button below to save your signup.</h6>
+
+      <p class="has-text-danger has-text-ws-pre-wrap" v-if="errorMsg">{{errorMsg}}</p>
+
+      <button class="button is-primary"
+              v-if="!isSubmitting"
+              @click="putSignup">
+        Submit
+      </button>
+      <button class="button is-primary is-loading"
+              v-if="isSubmitting">
+        Loading
+      </button>
+    </div>
+  </div>
+</div>
+
+<!--
+██╗   ██╗██╗   ██╗███████╗
+██║   ██║██║   ██║██╔════╝
+██║   ██║██║   ██║█████╗
+╚██╗ ██╔╝██║   ██║██╔══╝
+ ╚████╔╝ ╚██████╔╝███████╗
+  ╚═══╝   ╚═════╝ ╚══════╝
+-->
+<script>
+  const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  // ==== helpers ====
+  function intervalContains(start, stop, elem) {
+    return Math.min(start, stop) <= elem && elem <= Math.max(start, stop);
+  }
+
+  function differenceBetweenTz(a, b) {
+    // returns how many hours you need to add to times in *b* to get times in *a*
+    let now = moment.tz(a);
+    let offsetA = now.utcOffset();
+    now.tz(b);
+    let offsetB = now.utcOffset();
+    return (offsetA - offsetB) / 60;
+  }
+
+  // ==== setup app ====
+  const app = Vue.createApp({
+    data() {
+      return {
+        // submittable state
+        session: null,
+        times: [],
+        roles: [],
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        // other state
+        isLoading: true,  // initial page load
+        isSubmitting: false,  // submit loading
+        errorMsg: null
+      };
+    },
+    created() {
+      Promise.all([axios.get("[[=URL(f'api/sessions/{session_id}')]]"), axios.get("[[=URL(f'api/signups/{signup.id}')]]")])
+       .then(([sessionResponse, signupResponse]) => {
+         if (sessionResponse.data.success) {
+           this.session = sessionResponse.data.data;
+         }
+         if (signupResponse.data.success) {
+           this.times = signupResponse.data.data.times;
+           this.roles = signupResponse.data.data.roles;
+         }
+         this.isLoading = false;
+       });
+    }
+  });
+
+  // declare components
+  // ===== calendar grid =====
+  app.component('calendar-grid', {
+    template: '#calendar-template',
+    props: ['times', 'timezone'],
+    data() {
+      return {
+        // constants
+        days: DAYS_OF_WEEK,
+        halfHours: [...Array(48).keys()],
+        // selection
+        selected: Array(48 * 7).fill(false),
+        selectStateTransition: true, // what each cell in the selected area will transition to after selection completes
+        selectStartDay: null,
+        selectStartHalfHour: null,
+        selectEndDay: null,
+        selectEndHalfHour: null,
+      }
+    },
+    created() {
+      // initialize selected array to given times
+      for (const time in this.times) {
+        // calculate index
+        let tzDiff = differenceBetweenTz(this.timezone, time.timezone);
+        let startIdx = Math.floor((time.offset * 2) + tzDiff);
+        let endIdx = startIdx + Math.ceil((time.duration * 2) + tzDiff);
+
+        for (let i = startIdx; i <= endIdx; i++) {
+          // mod to keep it to bounds if idx passes week boundary
+          this.selected[i % this.selected.length] = true;
+        }
+      }
+    },
+    methods: {
+      startSelect(dayIndex, halfHourIndex) {
+        if (this.selectStartDay !== null) return;
+        this.selectStartDay = dayIndex;
+        this.selectStartHalfHour = halfHourIndex;
+        this.selectEndDay = dayIndex;
+        this.selectEndHalfHour = halfHourIndex;
+        this.selectStateTransition = !this.isSelected(dayIndex, halfHourIndex);
+      },
+      renderSelect(dayIndex, halfHourIndex) {
+        if (this.selectStartDay === null) return;
+        this.selectEndDay = dayIndex;
+        this.selectEndHalfHour = halfHourIndex;
+      },
+      endSelect(dayIndex, halfHourIndex) {
+        if (this.selectStartDay === null) return;
+        // set all indices in this.selected that fall within the range to stateTransition
+        for (let i = Math.min(this.selectStartDay, dayIndex); i <= Math.max(this.selectStartDay, dayIndex); i++) {
+          for (let j = Math.min(this.selectStartHalfHour, halfHourIndex); j <= Math.max(this.selectStartHalfHour, halfHourIndex); j++) {
+            let idx = i * 48 + j;
+            this.selected[idx] = this.selectStateTransition;
+          }
+        }
+        this.selectStartDay = null;
+        this.selectStartHalfHour = null;
+        this.selectEndDay = null;
+        this.selectEndHalfHour = null;
+        // and propogate it up to the shared times array by finding runs of consecutive available time
+        this.times.splice(0, this.times.length);
+        for (let i = 0; i < this.selected.length; i++) {
+          if (this.selected[i]) {
+            let startIdx = i;
+            while (this.selected[i]) {
+              i++;
+            }
+            this.times.push({
+              offset: startIdx / 2,
+              duration: (i - startIdx) / 2,
+              timezone: this.timezone
+            });
+          }
+        }
+      },
+      isSelected(dayIndex, halfHourIndex) {
+        return this.selected[dayIndex * 48 + halfHourIndex];
+      },
+      isInCurrentSelection(dayIndex, halfHourIndex) {
+        if (this.selectStartDay === null) return false;
+        return intervalContains(this.selectStartDay, this.selectEndDay, dayIndex)
+         && intervalContains(this.selectStartHalfHour, this.selectEndHalfHour, halfHourIndex);
+      },
+      shouldRenderSelected(dayIndex, halfHourIndex) {
+        let currentSelection = this.isInCurrentSelection(dayIndex, halfHourIndex);
+        return currentSelection ? this.selectStateTransition : this.isSelected(dayIndex, halfHourIndex);
+      }
+    }
+  });
+
+
+  // mount to the page
+  app.mount('#vue');
+</script>

@@ -1,0 +1,41 @@
+.calendar-header {
+    height: 24px;
+    text-align: center;
+}
+
+.calendar-left {
+    height: 12px;
+    margin-top: -1px;
+}
+
+.calendar-time-label {
+    margin-top: -12px;
+}
+
+.calendar-cell {
+    height: 12px;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    margin-top: -1px;
+}
+
+.calendar-cell.selected {
+    background-color: rgba(0, 255, 50, 0.3);
+}
+
+/* cell styling: every cell controls its sides and bottom, top cell puts on a hat */
+.calendar-cell:first-child {
+    border-top: 1px solid white;
+}
+
+.calendar-cell:nth-child(odd) {
+    border-bottom: 1px dashed gray;
+}
+
+.calendar-cell:nth-child(even) {
+    border-bottom: 1px solid lightgray;
+}
+
+.calendar-cell:nth-child(8n+4) {
+    border-bottom: 1px solid white;
+}
