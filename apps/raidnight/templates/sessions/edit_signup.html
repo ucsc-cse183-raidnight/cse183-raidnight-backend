@@ -222,7 +222,7 @@
           let startIdx = Math.floor((time.offset * HALF_HOURS_PER_HOUR) + tzDiff);
           let endIdx = startIdx + Math.ceil((time.duration * HALF_HOURS_PER_HOUR) + tzDiff);
 
-          for (let i = startIdx; i <= endIdx; i++) {
+          for (let i = startIdx; i < endIdx; i++) {
             // mod to keep it to bounds if idx passes week boundary
             this.selected[i % this.selected.length] = true;
           }
