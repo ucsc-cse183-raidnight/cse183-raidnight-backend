@@ -3,7 +3,7 @@
 <!------- Templates ------->
 [[block page_head]]
 <link rel="stylesheet" href="css/sessions/edit_signup.css">
-<!-- Rule Tag -->
+<!-- Calendar -->
 <script type="text/x-template" id="calendar-template">
   <div class="container">
     <div class="tile is-ancestor">
@@ -67,7 +67,8 @@
     <div class="section">
       <h4 class="title is-4">Times</h4>
       <h6 class="subtitle is-6">
-        Choose what times work best for you each week. Times are displayed in the {{timezone}} time zone.
+        Choose what times work best for you each week by clicking and dragging. Times are displayed in the {{timezone}}
+        time zone.
       </h6>
 
       <calendar-grid :times="times"
@@ -134,8 +135,8 @@
       return {
         // submittable state
         session: null,
-        times: [],
-        roles: [],
+        times: null,
+        roles: null,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         // other state
         isLoading: true,  // initial page load
@@ -146,6 +147,7 @@
     created() {
       Promise.all([axios.get("[[=URL(f'api/sessions/{session_id}')]]"), axios.get("[[=URL(f'api/signups/{signup.id}')]]")])
        .then(([sessionResponse, signupResponse]) => {
+         this.isLoading = false;
          if (sessionResponse.data.success) {
            this.session = sessionResponse.data.data;
          }
@@ -153,8 +155,29 @@
            this.times = signupResponse.data.data.times;
            this.roles = signupResponse.data.data.roles;
          }
-         this.isLoading = false;
        });
+    },
+    methods: {
+      putSignup() {
+        this.isSubmitting = true;
+        this.errorMsg = '';
+        axios.put("[[=URL(f'api/signups/{signup.id}')]]", {times: this.times, roles: this.roles})
+         .then(response => {
+           console.log(response);
+           // window.location.href = "[[=URL(f'sessions/{session_id}')]]";
+         })
+         .catch(error => {
+           console.error(error);
+           if (error.response?.data) {
+             this.errorMsg = error.response.data.error || error.response.statusText;
+           } else {
+             this.errorMsg = "Unknown error, please try again!";
+           }
+         })
+         .then(() => {
+           this.isSubmitting = false;
+         })
+      }
     }
   });
 
@@ -177,21 +200,31 @@
         selectEndHalfHour: null,
       }
     },
-    created() {
-      // initialize selected array to given times
-      for (const time in this.times) {
-        // calculate index
-        let tzDiff = differenceBetweenTz(this.timezone, time.timezone);
-        let startIdx = Math.floor((time.offset * 2) + tzDiff);
-        let endIdx = startIdx + Math.ceil((time.duration * 2) + tzDiff);
-
-        for (let i = startIdx; i <= endIdx; i++) {
-          // mod to keep it to bounds if idx passes week boundary
-          this.selected[i % this.selected.length] = true;
-        }
+    watch: {
+      times: {
+        handler(n, o) {
+          this.recalculateSelectedTimes();
+        },
+        immediate: true
       }
     },
     methods: {
+      recalculateSelectedTimes() {
+        console.log("Recalculating times");
+        console.log(this.times);
+        // initialize selected array to given times
+        this.times.forEach(time => {
+          // calculate index
+          let tzDiff = differenceBetweenTz(this.timezone, time.timezone);
+          let startIdx = Math.floor((time.offset * 2) + tzDiff);
+          let endIdx = startIdx + Math.ceil((time.duration * 2) + tzDiff);
+
+          for (let i = startIdx; i <= endIdx; i++) {
+            // mod to keep it to bounds if idx passes week boundary
+            this.selected[i % this.selected.length] = true;
+          }
+        });
+      },
       startSelect(dayIndex, halfHourIndex) {
         if (this.selectStartDay !== null) return;
         this.selectStartDay = dayIndex;

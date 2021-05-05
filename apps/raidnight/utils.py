@@ -101,7 +101,7 @@ def get_game_signup_full(db, signup_id):
         times.append(SignupTime.parse_obj(time_data))
 
     for role_data in db(db.game_signup_roles.signup_id == signup_id).select():
-        times.append(SignupRole.parse_obj(role_data))
+        roles.append(SignupRole.parse_obj(role_data))
 
     return GameSignupFull(
         user=user,

@@ -207,6 +207,37 @@ def api_get_signup(signup_id):
     return success(game_signup.dict())
 
 
+@action('api/signups/<signup_id:int>', method=['PUT'])
+@action.uses(db, session, auth)
+def api_update_signup(signup_id):
+    user = get_user()
+    existing_signup = db.game_signups[signup_id]
+    if existing_signup is None:
+        return error(404, "Signup not found")
+    if existing_signup.user_id is not None and user != existing_signup.user_id:
+        return error(403, "You do not have permission to edit this signup")
+
+    # validate data
+    try:
+        data = request.json
+        new_signup = schemas.EditSignup.parse_obj(data)
+    except ValidationError as e:
+        return error(422, str(e))
+    except Exception:
+        return error(400, "Could not decode json")
+
+    # write the data to the database: delete all existing associated rules/times and insert new provided ones
+    db(db.game_signup_times.signup_id == signup_id).delete()
+    db(db.game_signup_roles.signup_id == signup_id).delete()
+    for time in new_signup.times:
+        db.game_signup_times.insert(signup_id=signup_id, **time.dict())
+
+    for role in new_signup.roles:
+        db.game_signup_roles.insert(signup_id=signup_id, **role.dict())
+
+    return success({'id': signup_id})
+
+
 # ==== dev test ====
 # todo remove me
 @action('test/vue')
