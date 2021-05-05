@@ -12,7 +12,7 @@
         <div class="calendar-header"><!-- spacer --></div>
         <div class="calendar-left" v-for="interval of halfHours">
           <div class="calendar-time-label has-text-centered" v-if="interval % 8 === 4">
-            {{interval / 2}}:00
+            {{interval / HALF_HOURS_PER_HOUR}}:00
           </div>
         </div>
       </div>
@@ -115,6 +115,7 @@
 <script>
   const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const HALF_HOURS_PER_DAY = 48;
+  const HALF_HOURS_PER_HOUR = 2;
 
   // ==== helpers ====
   function intervalContains(start, stop, elem) {
@@ -190,6 +191,7 @@
     data() {
       return {
         // constants
+        HALF_HOURS_PER_HOUR: HALF_HOURS_PER_HOUR,
         days: DAYS_OF_WEEK,
         halfHours: [...Array(HALF_HOURS_PER_DAY).keys()],
         // selection
@@ -217,8 +219,8 @@
         this.times.forEach(time => {
           // calculate index
           let tzDiff = differenceBetweenTz(this.timezone, time.timezone);
-          let startIdx = Math.floor((time.offset * 2) + tzDiff);
-          let endIdx = startIdx + Math.ceil((time.duration * 2) + tzDiff);
+          let startIdx = Math.floor((time.offset * HALF_HOURS_PER_HOUR) + tzDiff);
+          let endIdx = startIdx + Math.ceil((time.duration * HALF_HOURS_PER_HOUR) + tzDiff);
 
           for (let i = startIdx; i <= endIdx; i++) {
             // mod to keep it to bounds if idx passes week boundary
@@ -261,8 +263,8 @@
               i++;
             }
             this.times.push({
-              offset: startIdx / 2,
-              duration: (i - startIdx) / 2,
+              offset: startIdx / HALF_HOURS_PER_HOUR,
+              duration: (i - startIdx) / HALF_HOURS_PER_HOUR,
               timezone: this.timezone
             });
           }
