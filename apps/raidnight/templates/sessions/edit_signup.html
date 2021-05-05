@@ -114,6 +114,7 @@
 -->
 <script>
   const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const HALF_HOURS_PER_DAY = 48;
 
   // ==== helpers ====
   function intervalContains(start, stop, elem) {
@@ -190,9 +191,9 @@
       return {
         // constants
         days: DAYS_OF_WEEK,
-        halfHours: [...Array(48).keys()],
+        halfHours: [...Array(HALF_HOURS_PER_DAY).keys()],
         // selection
-        selected: Array(48 * 7).fill(false),
+        selected: Array(HALF_HOURS_PER_DAY * 7).fill(false),
         selectStateTransition: true, // what each cell in the selected area will transition to after selection completes
         selectStartDay: null,
         selectStartHalfHour: null,
@@ -243,7 +244,7 @@
         // set all indices in this.selected that fall within the range to stateTransition
         for (let i = Math.min(this.selectStartDay, dayIndex); i <= Math.max(this.selectStartDay, dayIndex); i++) {
           for (let j = Math.min(this.selectStartHalfHour, halfHourIndex); j <= Math.max(this.selectStartHalfHour, halfHourIndex); j++) {
-            let idx = i * 48 + j;
+            let idx = i * HALF_HOURS_PER_DAY + j;
             this.selected[idx] = this.selectStateTransition;
           }
         }
@@ -268,7 +269,7 @@
         }
       },
       isSelected(dayIndex, halfHourIndex) {
-        return this.selected[dayIndex * 48 + halfHourIndex];
+        return this.selected[dayIndex * HALF_HOURS_PER_DAY + halfHourIndex];
       },
       isInCurrentSelection(dayIndex, halfHourIndex) {
         if (this.selectStartDay === null) return false;
