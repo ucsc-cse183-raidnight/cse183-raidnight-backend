@@ -182,6 +182,35 @@ def api_create_session():
 
     return success({"id": session_id, "invite_key": invite_key})
 
+@action('api/sessions/<session_id:int>', method=['POST'])
+@action.uses(db, session, auth)
+def api_update_session(session_id=None):
+    user = get_user()
+
+    try:
+        data = request.json
+    except Exception:
+        return error(400, "Could not decode JSON")
+
+    # validate the data
+    try:
+        edited_session = schemas.EditSession.parse_obj(data)
+    except ValidationError as e:
+        return error(422, str(e))
+
+    # update database
+    # game session
+    # update name, description
+    db(db.game_sessions.id == session_id).update(name=edited_session.name, description=edited_session.description)
+    # update rules
+    # first delete all exsiting rules belong to this session
+    db(db.game_rules.session_id == session_id).delete()
+    # insert new rules
+    for rule in edited_session.rules:
+        db.game_rules.insert(session_id=session_id, role_id=rule.role_id, rule_operator=rule.operator.value,
+                             rule_value=rule.value)
+
+    return success({"id": session_id})
 
 @action('api/sessions/<session_id:int>', method=['GET'])
 @action.uses(db, session, auth)
