@@ -41,7 +41,7 @@
     <!-- Tree items -->
     <role-tree-item v-for="role of roles"
                     :role="role"
-                    :roleSelection="roleSelection">
+                    :role-selection="roleSelection">
     </role-tree-item>
   </div>
 </script>
@@ -76,24 +76,31 @@
         </div>
       </div> <!-- </level-left> -->
 
-      <div class="level-right">
+      <div class="level-right"
+           v-if="!role.children?.length">
         <div class="field has-addons">
           <p class="control">
-            <button class="button">
+            <button class="button"
+                    @click="removeRole()"
+                    :class="{'is-danger': isCannotPlay()}">
               <span class="icon is-small">
                 <i class="fas fa-times"></i>
               </span>
             </button>
           </p>
           <p class="control">
-            <button class="button">
+            <button class="button"
+                    @click="setRoleState(10)"
+                    :class="{'is-primary': isCanPlay()}">
               <span class="icon is-small">
                 <i class="fas fa-meh"></i>
               </span>
             </button>
           </p>
           <p class="control">
-            <button class="button">
+            <button class="button"
+                    @click="setRoleState(0)"
+                    :class="{'is-success': isWantToPlay()}">
               <span class="icon is-small">
                 <i class="fas fa-laugh-beam"></i>
               </span>
@@ -106,7 +113,7 @@
     <!-- Subroles -->
     <div class="ml-5" v-if="role.children?.length > 0">
       <role-tree :roles="role.children"
-                 :roleSelection="roleSelection">
+                 :role-selection="roleSelection">
       </role-tree>
     </div>
   </div> <!-- </role-tree-item> -->
@@ -175,7 +182,7 @@
 
       <div class="container">
         <role-tree :roles="session.roles"
-                   :roleSelection="roles">
+                   :role-selection="roles">
         </role-tree>
       </div>
     </div>
@@ -392,6 +399,7 @@
     template: '#role-tree-item-template',
     props: ['role', 'roleSelection'],
     methods: {
+      // display helpers
       niceOperator(rule) {
         switch (rule.operator) {
           case 'eq':
@@ -407,6 +415,30 @@
           default:
             return rule.operator.toUpperCase();
         }
+      },
+      isCannotPlay() {
+        return !this.roleSelection.some(sel => sel.role_id === this.role.id);
+      },
+      isCanPlay() {
+        return this.roleSelection.find(sel => sel.role_id === this.role.id)?.weight > 0;
+      },
+      isWantToPlay() {
+        return this.roleSelection.find(sel => sel.role_id === this.role.id)?.weight === 0;
+      },
+      // actions
+      removeRole() {
+        // I cannot play this role
+        // remove all entries of this role from roleSelection in place
+        let idx;
+        while ((idx = this.roleSelection.findIndex(sel => sel.role_id === this.role.id)) !== -1) {
+          this.roleSelection.splice(idx, 1);
+        }
+      },
+      setRoleState(cost) {
+        // set cost of playing this role
+        // remove any entries of this role from roleSelection and push a new one
+        this.removeRole();
+        this.roleSelection.push({role_id: this.role.id, weight: cost});
       }
     }
   });
