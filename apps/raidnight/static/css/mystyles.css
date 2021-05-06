@@ -443,7 +443,7 @@ a.box:active {
   background-color: #1e2025;
   border-color: #dbdbdb;
   border-width: 1px;
-  color: #363636;
+  color: #dadbdb;
   cursor: pointer;
   justify-content: center;
   padding-bottom: calc(0.5em - 1px);

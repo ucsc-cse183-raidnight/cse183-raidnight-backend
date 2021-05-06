@@ -34,6 +34,84 @@
     </div>
   </div>
 </script>
+
+<!-- Role Tree -->
+<script type="text/x-template" id="role-tree-template">
+  <div class="role-tree">
+    <!-- Tree items -->
+    <role-tree-item v-for="role of roles"
+                    :role="role"
+                    :roleSelection="roleSelection">
+    </role-tree-item>
+  </div>
+</script>
+
+<!-- Role Tree Item -->
+<script type="text/x-template" id="role-tree-item-template">
+  <div class="role-tree-item">
+    <div class="level m-0 is-mobile">
+      <div class="level-left">
+        <!-- role image -->
+        <div class="level-item">
+          <figure class="image is-64x64">
+            <img :src="role.icon || 'img/noclass.png'">
+          </figure>
+        </div>
+        <!-- role name, rules (stacked) -->
+        <div class="level-item">
+          <div> <!-- used to stack these vertically -->
+            <!-- Name -->
+            <p>
+              <span class="subtitle mr-1">{{role.name}}</span>
+            </p>
+            <!-- Rules -->
+            <div class="tags">
+              <span class="tag">Rules:</span>
+              <span class="tag is-primary"
+                    v-for="rule of role.rules">
+                {{niceOperator(rule)}} {{rule.value}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div> <!-- </level-left> -->
+
+      <div class="level-right">
+        <div class="field has-addons">
+          <p class="control">
+            <button class="button">
+              <span class="icon is-small">
+                <i class="fas fa-times"></i>
+              </span>
+            </button>
+          </p>
+          <p class="control">
+            <button class="button">
+              <span class="icon is-small">
+                <i class="fas fa-meh"></i>
+              </span>
+            </button>
+          </p>
+          <p class="control">
+            <button class="button">
+              <span class="icon is-small">
+                <i class="fas fa-laugh-beam"></i>
+              </span>
+            </button>
+          </p>
+        </div>
+      </div> <!-- </level-right> -->
+    </div> <!-- </level> -->
+
+    <!-- Subroles -->
+    <div class="ml-5" v-if="role.children?.length > 0">
+      <role-tree :roles="role.children"
+                 :roleSelection="roleSelection">
+      </role-tree>
+    </div>
+  </div> <!-- </role-tree-item> -->
+</script>
+
 [[end]]
 
 <!--
@@ -79,9 +157,27 @@
     <!-- roles -->
     <div class="section">
       <h4 class="title is-4">Roles</h4>
-      <h6 class="subtitle is-6">Choose which roles you'd like to play.</h6>
+      <h6 class="subtitle is-6">
+        Choose which roles you'd like to play.
+        <span class="icon">
+          <i class="fas fa-times"></i>
+        </span>
+        = I cannot play this role;
+        <span class="icon">
+          <i class="fas fa-meh"></i>
+        </span>
+        = I can play this role;
+        <span class="icon">
+          <i class="fas fa-laugh-beam"></i>
+        </span>
+        = I would like to play this role
+      </h6>
 
-      <!-- todo: vue role component -->
+      <div class="container">
+        <role-tree :roles="session.roles"
+                   :roleSelection="roles">
+        </role-tree>
+      </div>
     </div>
 
     <!-- submit -->
@@ -254,7 +350,7 @@
         this.selectStartHalfHour = null;
         this.selectEndDay = null;
         this.selectEndHalfHour = null;
-        // and propogate it up to the shared times array by finding runs of consecutive available time
+        // and propagate it up to the shared times array by finding runs of consecutive available time
         this.times.splice(0, this.times.length);
         for (let i = 0; i < this.selected.length; i++) {
           if (this.selected[i]) {
@@ -281,6 +377,36 @@
       shouldRenderSelected(dayIndex, halfHourIndex) {
         let currentSelection = this.isInCurrentSelection(dayIndex, halfHourIndex);
         return currentSelection ? this.selectStateTransition : this.isSelected(dayIndex, halfHourIndex);
+      }
+    }
+  });
+
+  // ==== role tree ====
+  app.component('role-tree', {
+    template: '#role-tree-template',
+    props: ['roles', 'roleSelection']
+  });
+
+  // ==== role tree item ====
+  app.component('role-tree-item', {
+    template: '#role-tree-item-template',
+    props: ['role', 'roleSelection'],
+    methods: {
+      niceOperator(rule) {
+        switch (rule.operator) {
+          case 'eq':
+            return 'Exactly';
+          case 'ge':
+            return 'At least';
+          case 'gt':
+            return 'More than';
+          case 'le':
+            return 'At most';
+          case 'lt':
+            return 'Less than';
+          default:
+            return rule.operator.toUpperCase();
+        }
       }
     }
   });
