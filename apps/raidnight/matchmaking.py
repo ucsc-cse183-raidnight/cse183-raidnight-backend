@@ -103,8 +103,8 @@ def find_timespans(signups):
 
     # sort by preference for people, then length - add a point if duration is greater than 3h
     # formula: score = people + sqrt(duration) / 1.2
+    # noinspection PyShadowingNames
     def scorer(item):
-        # noinspection PyShadowingNames
         start, stop, ids = item
         if stop < start:
             duration = constants.HOURS_IN_WEEK - start + stop
