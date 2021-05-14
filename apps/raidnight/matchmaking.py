@@ -1,0 +1,123 @@
+"""
+This file contains the A*-based matchmaking algorithm. It operates in 2 phases:
+
+1. Find potential timespans (naive)
+2. Assign players to roles
+"""
+import datetime
+import math
+
+import pytz
+
+from . import constants, schemas
+from .utils import get_game_signup_full
+
+
+def load_all_signups(db, session_id):
+    """
+    Utility: given the game session id, load all signups
+
+    :rtype: list[schemas.GameSignupFull]
+    """
+    out = []
+    for signup in db(db.game_signups.session_id == session_id).select():
+        out.append(get_game_signup_full(db, signup.id))
+    return out
+
+
+def find_timespans(signups):
+    """
+    Given a list of signups, return a list of tuples (start, stop, signup_ids)
+
+    Note that if stop < start, the interval spans a week reset
+
+    :type signups: list[schemas.GameSignupFull]
+    """
+    # convert all times to utc, and mark offsets where availability changes
+    event_offsets = set()
+    for signup in signups:
+        for time in signup.times[:]:  # iterate over a copy so we can modify the original
+            try:
+                tzinfo = pytz.timezone(time.timezone)
+                # get offset in hours
+                utc_offset = tzinfo.utcoffset(datetime.datetime.now()) / datetime.timedelta(hours=1)
+            except pytz.UnknownTimeZoneError:
+                try:
+                    utc_offset = float(time.timezone)
+                except ValueError:
+                    print(f"WARN: Cannot understand time zone {time.timezone!r}")
+                    utc_offset = -7  # oh well, you live in california now
+
+            time.offset -= utc_offset
+            time.timezone = "Etc/UTC"
+            # ---- normalize ----
+            # make offset fall in week
+            if (time.offset <= 0) or (time.offset >= constants.HOURS_IN_WEEK):
+                time.offset %= constants.HOURS_IN_WEEK
+            # if interval would wrap around, split it into 2
+            if time.offset + time.duration > constants.HOURS_IN_WEEK:
+                duration_after_wrap = (time.offset + time.duration) % constants.HOURS_IN_WEEK
+                time.duration = constants.HOURS_IN_WEEK - time.offset
+                signup.times.append(schemas.SignupTime(offset=0, duration=duration_after_wrap, timezone="Etc/UTC"))
+
+        for time in signup.times:  # iterate again since we may have modified the array
+            event_offsets.add(time.offset)
+            event_offsets.add(time.offset + time.duration)
+
+    # each signup now has normalized times
+    # these are the hours where someone's availability changes
+    event_offsets.add(0)
+    event_offsets.add(constants.HOURS_IN_WEEK)
+    event_offsets = sorted(list(event_offsets))
+
+    # build the sets of who is available when
+    # we keep track of the sets of people available at the current idx in buffer, and then examine the next event time:
+    # for each set where the set of availability is not a superset, pop it and add it to the list
+    out = []  # list of triples (start, stop, ids)
+    buffer = []  # list of pairs (start_time, available (set of ids))
+    for event_time in event_offsets:
+        available_set = {s.id for s in signups if is_available(s, event_time)}
+        # pop any that are not subsets of the current available set
+        for item in buffer[:]:
+            start_time, ids = item
+            if not available_set.issuperset(ids):
+                buffer.remove(item)
+                out.append((start_time, event_time, ids))
+        # if this specific set is not already in the buffer, add it
+        if available_set and not any(avail == available_set for _, avail in buffer):
+            buffer.append((event_time, available_set))
+    # sanity check: flush anything still in the buffer
+    for start_time, ids in buffer:
+        out.append((start_time, constants.HOURS_IN_WEEK, ids))
+
+    # merge any that span a week reset
+    # this can probably be done in less than O(n^2) time but I haven't eaten dinner yet and n <= 8 so whatever
+    starting_at_0 = [i for i in out if i[0] == 0]
+    ending_at_168 = [i for i in out if i[1] == constants.HOURS_IN_WEEK]
+    for end in ending_at_168:
+        for start in starting_at_0:
+            if end[2] == start[2]:
+                out.remove(end)
+                out.remove(start)
+                out.append((end[0], start[1], end[2]))
+
+    # sort by preference for people, then length - add a point if duration is greater than 3h
+    # formula: score = people + sqrt(duration) / 1.2
+    def scorer(item):
+        # noinspection PyShadowingNames
+        start, stop, ids = item
+        if stop < start:
+            duration = constants.HOURS_IN_WEEK - start + stop
+        else:
+            duration = stop - start
+        people = len(ids)
+        duration_score = people + math.sqrt(duration) / 1.2
+        return people + duration_score
+
+    return sorted(out, key=scorer, reverse=True)
+
+
+# ==== helpers ====
+def is_available(signup, offset):
+    """Whether or not the given signup is available at the given instant."""
+    return any(t.offset <= offset < t.offset + t.duration for t in signup.times)

@@ -1,7 +1,7 @@
 from py4web import URL, abort, action, redirect, request
 from pydantic import ValidationError
 
-from . import dummy, presets, schemas
+from . import dummy, matchmaking, presets, schemas
 from .fixtures import auth, db, session, url_signer
 from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, success
 
@@ -279,3 +279,10 @@ def test_vue():
 @action('test/api/vue')
 def test_vue_ajax():
     return success([{'n': 5}, {'n': 3}, {'n': 1}, {'n': 500}])
+
+@action('test/matchmaking/<session_id:int>')
+@action.uses(db)
+def test_matchmaking(session_id):
+    signups = matchmaking.load_all_signups(db, session_id)
+    signups = dummy.signups2
+    return success(matchmaking.find_timespans(signups))

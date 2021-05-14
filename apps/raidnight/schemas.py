@@ -127,6 +127,7 @@ class GameSessionFull(BaseModel):
 
 # ---- signup ----
 class GameSignupFull(EditSignup):
+    id: int
     user: Optional[DiscordUser]
     anonymous_name: Optional[str]
 
