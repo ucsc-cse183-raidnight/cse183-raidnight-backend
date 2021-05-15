@@ -126,14 +126,14 @@ def solve_roles(game_session, signups):
     """
     :type game_session: schemas.GameSessionFull
     :type signups: list[schemas.GameSignupFull]
-    :rtype: frozenset[tuple[schemas.GameSignupFull, int]]
+    :rtype: frozenset[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
     """
     goal = object()
     roles_by_id = {r.id: r for r in game_session.all_roles}
 
     def neighbors(node):
         """
-        :type node: frozenset[tuple[schemas.GameSignupFull, int]]
+        :type node: frozenset[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
         """
         # assigned_set = {s for s, _ in node}
         # for signup in signups:
@@ -144,7 +144,7 @@ def solve_roles(game_session, signups):
         if len(node) < len(signups):
             signup = signups[len(node)]
             for role in signup.roles:
-                yield frozenset.union(node, [(signup, role.role_id)])
+                yield frozenset.union(node, [(signup, roles_by_id[role.role_id])])
             yield frozenset.union(node, [(signup, None)])
         yield goal
 
@@ -157,10 +157,9 @@ def solve_roles(game_session, signups):
             node = last_node
 
         role_assignment = collections.Counter()
-        for signup, role_id in node:
-            if role_id is None:
+        for signup, role in node:
+            if role is None:
                 continue
-            role = roles_by_id[role_id]
             role_assignment[role.id] += 1
             while role.parent_id:
                 role = roles_by_id[role.parent_id]
@@ -183,10 +182,11 @@ def solve_roles(game_session, signups):
                 elif rule.operator == schemas.RuleOperator.LT:
                     total_cost += RULE_BREAK_COST * (difference + 1)
 
-        for signup, role_id in node:
-            signup_role = next((r for r in signup.roles if r.role_id == role_id), None)  # todo optimize me
-            if signup_role is not None:
-                total_cost += signup_role.weight
+        for signup, role in node:
+            if role is not None:
+                signup_role = next((r for r in signup.roles if r.role_id == role.id), None)  # todo optimize me
+                if signup_role is not None:
+                    total_cost += signup_role.weight
 
         return total_cost
 

@@ -1527,6 +1527,7 @@ def signup(name, offset_and_durations, wanted_roles=[], ok_roles=[]):
 
     return DummySignup(
         id=name,
+        anonymous_name=name,
         times=[schemas.SignupTime(offset=offset, duration=duration, timezone="Etc/UTC")
                for offset, duration in offset_and_durations],
         roles=[schemas.SignupRole(role_id=full_session_roles[role_name], weight=0) for role_name in wanted_roles]

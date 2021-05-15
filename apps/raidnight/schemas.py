@@ -104,6 +104,9 @@ class GameSessionRole(BaseModel):
     children: List[GameSessionRole]
     rules: List[GameSessionRule]
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 class GameSessionInvite(BaseModel):
     id: int
@@ -133,6 +136,10 @@ class GameSignupFull(EditSignup):
 
     def __hash__(self):
         return hash(self.id)
+
+    @property
+    def username(self):
+        return self.anonymous_name or self.user.username
 
 
 # forward refs
