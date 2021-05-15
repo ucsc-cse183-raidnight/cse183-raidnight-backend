@@ -4,13 +4,18 @@ This file contains the A*-based matchmaking algorithm. It operates in 2 phases:
 1. Find potential timespans (naive)
 2. Assign players to roles
 """
+import collections
 import datetime
 import math
+import queue
 
 import pytz
 
 from . import constants, schemas
 from .utils import get_game_signup_full
+
+RULE_BREAK_COST = 30
+CANNOT_PLAY_COST = 9999
 
 
 def load_all_signups(db, session_id):
@@ -115,6 +120,147 @@ def find_timespans(signups):
         return people + duration_score
 
     return sorted(out, key=scorer, reverse=True)
+
+
+def solve_roles(game_session, signups):
+    """
+    :type game_session: schemas.GameSessionFull
+    :type signups: list[schemas.GameSignupFull]
+    :rtype: frozenset[tuple[schemas.GameSignupFull, int]]
+    """
+    goal = object()
+    roles_by_id = {r.id: r for r in game_session.all_roles}
+
+    def neighbors(node):
+        """
+        :type node: frozenset[tuple[schemas.GameSignupFull, int]]
+        """
+        # assigned_set = {s for s, _ in node}
+        # for signup in signups:
+        #     if signup in assigned_set:
+        #         continue
+        #     for role in signup.roles:
+        #         yield frozenset.union(node, [(signup, role.role_id)])
+        if len(node) < len(signups):
+            signup = signups[len(node)]
+            for role in signup.roles:
+                yield frozenset.union(node, [(signup, role.role_id)])
+            yield frozenset.union(node, [(signup, None)])
+        yield goal
+
+    def heuristic(node, last_node):
+        """
+        :type node: set[tuple[schemas.GameSignupFull, int]] or object
+        """
+        is_goal = node is goal
+        if is_goal:
+            node = last_node
+
+        role_assignment = collections.Counter()
+        for signup, role_id in node:
+            if role_id is None:
+                continue
+            role = roles_by_id[role_id]
+            role_assignment[role.id] += 1
+            while role.parent_id:
+                role = roles_by_id[role.parent_id]
+                role_assignment[role.id] += 1
+
+        if is_goal:  # real cost
+            total_cost = cost(role_assignment)
+        else:  # cost only considering ones that cannot be fixed (already assigned more than max)
+            total_cost = 0
+            for rule in game_session.all_rules:
+                num_people = role_assignment[rule.role_id]
+                if num_people < rule.value:
+                    continue
+                difference = num_people - rule.value
+
+                if rule.operator == schemas.RuleOperator.EQ:
+                    total_cost += RULE_BREAK_COST * difference
+                elif rule.operator == schemas.RuleOperator.LE:
+                    total_cost += RULE_BREAK_COST * difference
+                elif rule.operator == schemas.RuleOperator.LT:
+                    total_cost += RULE_BREAK_COST * (difference + 1)
+
+        for signup, role_id in node:
+            signup_role = next((r for r in signup.roles if r.role_id == role_id), None)  # todo optimize me
+            if signup_role is not None:
+                total_cost += signup_role.weight
+
+        return total_cost
+
+    def cost(role_assignment):
+        """
+        :type assignments: set[tuple[schemas.GameSignupFull, int]]
+        """
+
+        # for k,v in role_assignment.items():
+        #     print(f"{roles_by_id[k].name}: {v}")
+
+        total_cost = 0
+        for rule in game_session.all_rules:
+            num_people = role_assignment[rule.role_id]
+            difference = num_people - rule.value
+
+            if rule.operator == schemas.RuleOperator.EQ:
+                total_cost += RULE_BREAK_COST * abs(difference)
+            elif rule.operator == schemas.RuleOperator.LE and difference > 0:
+                total_cost += RULE_BREAK_COST * difference
+            elif rule.operator == schemas.RuleOperator.LT and difference >= 0:
+                total_cost += RULE_BREAK_COST * (difference + 1)
+            elif rule.operator == schemas.RuleOperator.GE and difference < 0:
+                total_cost += RULE_BREAK_COST * -difference
+            elif rule.operator == schemas.RuleOperator.GT and difference <= 0:
+                total_cost += RULE_BREAK_COST * -(difference - 1)
+
+        return total_cost
+
+    start = frozenset()
+    frontier = {start}
+
+    g_score = collections.defaultdict(lambda: float('inf'))
+    g_score[start] = 0
+    f_score = collections.defaultdict(lambda: float('inf'))
+    f_score[start] = 0
+    best_solution = start
+
+    while len(frontier):
+        current = min([(node, f_score[node]) for node in frontier], key=lambda n: n[1])[0]
+
+        # print(f"Current ({f_score[current]})")
+        # printNode(current)
+        # print()
+
+        if current is goal:
+            # print("\nSolution!")
+            # printNode(best_solution)
+            return best_solution
+
+        frontier.remove(current)
+        for neighbor in neighbors(current):
+            tentative_g_score = heuristic(neighbor, current)
+            if tentative_g_score < g_score[neighbor]:
+                if neighbor is goal:
+                    best_solution = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = g_score[neighbor] - ((0.0001 * len(current)) + 0.0001)
+                # printNode(neighbor)
+                # print(f"fscore: {f_score[neighbor]}")
+                frontier.add(neighbor)
+
+        # print("Done with iteration\n")
+    raise RuntimeError("this should never happen")
+
+
+# from . import dummy
+#
+#
+# def printNode(node, after=''):
+#     try:
+#         print(", ".join(f"{s.id} on {dummy.full_session_roles_by_id[r] if r else 'none'}" for s, r in node) + after)
+#     except:
+#         print("goal" + after)
 
 
 # ==== helpers ====

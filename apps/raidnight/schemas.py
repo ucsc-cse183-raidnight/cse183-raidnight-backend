@@ -131,6 +131,9 @@ class GameSignupFull(EditSignup):
     user: Optional[DiscordUser]
     anonymous_name: Optional[str]
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 # forward refs
 GameSessionRole.update_forward_refs()

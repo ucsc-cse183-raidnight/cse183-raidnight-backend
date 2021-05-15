@@ -284,5 +284,13 @@ def test_vue_ajax():
 @action.uses(db)
 def test_matchmaking(session_id):
     signups = matchmaking.load_all_signups(db, session_id)
-    signups = dummy.signups2
+    signups = dummy.signups
     return success(matchmaking.find_timespans(signups))
+
+@action('test/matchmaking2')
+@action.uses(db)
+def test_matchmaking2():
+    signups = dummy.signups
+    session = get_game_session_full(db, 8)
+    solution = matchmaking.solve_roles(session, signups)
+    return success(solution)
