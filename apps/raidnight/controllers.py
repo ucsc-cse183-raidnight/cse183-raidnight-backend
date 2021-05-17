@@ -292,6 +292,6 @@ def test_matchmaking(session_id):
 def test_matchmaking2():
     signups = dummy.signups
     session = get_game_session_full(db, 8)
-    solution = matchmaking.solve_roles(session, signups)
+    solution = matchmaking.RoleSolver(session, signups).solve()
     solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
     return success(solution_list)

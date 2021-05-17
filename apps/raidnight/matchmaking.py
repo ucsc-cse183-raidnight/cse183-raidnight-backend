@@ -122,69 +122,78 @@ def find_timespans(signups):
     return sorted(out, key=scorer, reverse=True)
 
 
-def solve_roles(game_session, signups):
-    """
-    :type game_session: schemas.GameSessionFull
-    :type signups: list[schemas.GameSignupFull]
-    :rtype: frozenset[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
-    """
-    goal = object()
-    roles_by_id = {r.id: r for r in game_session.all_roles}
+def is_available(signup, offset):
+    """Whether or not the given signup is available at the given instant."""
+    return any(t.offset <= offset < t.offset + t.duration for t in signup.times)
 
-    def neighbors(node):
+
+class RoleSolver:
+    def __init__(self, game_session, signups):
+        """
+        :type game_session: schemas.GameSessionFull
+        :type signups: list[schemas.GameSignupFull]
+        """
+        self.game_session = game_session
+        self.signups = signups
+        self.goal = object()
+        self.roles_by_id = {r.id: r for r in game_session.all_roles}
+
+    def neighbors(self, node):
         """
         :type node: frozenset[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
         """
-        # assigned_set = {s for s, _ in node}
-        # for signup in signups:
-        #     if signup in assigned_set:
-        #         continue
-        #     for role in signup.roles:
-        #         yield frozenset.union(node, [(signup, role.role_id)])
-        if len(node) < len(signups):
-            signup = signups[len(node)]
+        if len(node) < len(self.signups):
+            signup = self.signups[len(node)]
             for role in signup.roles:
-                yield frozenset.union(node, [(signup, roles_by_id[role.role_id])])
+                yield frozenset.union(node, [(signup, self.roles_by_id[role.role_id])])
             yield frozenset.union(node, [(signup, None)])
-        yield goal
+        yield self.goal
 
-    def get_role_counts(roles):
+    def get_role_counts(self, roles):
+        """
+        Given a list of roles, returns a mapping of role id -> count. If a given role has a parent, counts its parents.
+
+        :type roles: list[schemas.GameSessionRole]
+        :rtype: dict[int, int]
+        """
         role_count = collections.Counter()
         for role in roles:
             if role is None:
                 continue
             role_count[role.id] += 1
             while role.parent_id:
-                role = roles_by_id[role.parent_id]
+                role = self.roles_by_id[role.parent_id]
                 role_count[role.id] += 1
         return role_count
 
-    def assigned_cost(node, last_node):
+    def assigned_cost(self, node, last_node):
         """
         AKA g score: the minimum cost incurred at this node
 
         :type node: set[tuple[schemas.GameSignupFull, schemas.GameSessionRole]] or object
+        :type last_node: set[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
         """
-        if node is goal:
-            return exact_cost(get_role_counts([role for signup, role in last_node]))
+        if node is self.goal:
+            total_cost = self.exact_cost(self.get_role_counts([role for signup, role in last_node]))
+            node = last_node
+        else:
+            # cost only considering ones that cannot be fixed (already assigned more than max)
+            role_assignment = self.get_role_counts([role for signup, role in node])
+            total_cost = 0
+            for rule in self.game_session.all_rules:
+                num_people = role_assignment[rule.role_id]
+                if num_people < rule.value:
+                    continue
+                difference = num_people - rule.value
 
-        role_assignment = get_role_counts([role for signup, role in node])
+                if rule.operator == schemas.RuleOperator.EQ:
+                    total_cost += RULE_BREAK_COST * difference
+                elif rule.operator == schemas.RuleOperator.LE:
+                    total_cost += RULE_BREAK_COST * difference
+                elif rule.operator == schemas.RuleOperator.LT:
+                    total_cost += RULE_BREAK_COST * (difference + 1)
 
-        # cost only considering ones that cannot be fixed (already assigned more than max)
-        total_cost = 0
-        for rule in game_session.all_rules:
-            num_people = role_assignment[rule.role_id]
-            if num_people < rule.value:
-                continue
-            difference = num_people - rule.value
-
-            if rule.operator == schemas.RuleOperator.EQ:
-                total_cost += RULE_BREAK_COST * difference
-            elif rule.operator == schemas.RuleOperator.LE:
-                total_cost += RULE_BREAK_COST * difference
-            elif rule.operator == schemas.RuleOperator.LT:
-                total_cost += RULE_BREAK_COST * (difference + 1)
-
+        # account for playing meh roles
         for signup, role in node:
             if role is not None:
                 signup_role = next((r for r in signup.roles if r.role_id == role.id), None)  # todo optimize me
@@ -193,18 +202,14 @@ def solve_roles(game_session, signups):
 
         return total_cost
 
-    def exact_cost(role_counts):
+    def exact_cost(self, role_counts):
         """
         The exact cost incurred by breaking rules by the given role assignment
 
         :type role_counts: dict[int, int]
         """
-
-        # for k,v in role_assignment.items():
-        #     print(f"{roles_by_id[k].name}: {v}")
-
         total_cost = 0
-        for rule in game_session.all_rules:
+        for rule in self.game_session.all_rules:
             num_people = role_counts[rule.role_id]
             difference = num_people - rule.value
 
@@ -221,25 +226,25 @@ def solve_roles(game_session, signups):
 
         return total_cost
 
-    def speculative_cost(node):
+    def speculative_cost(self, node):
         """
         The minimum cost we'll incur because there aren't enough people in the remaining pool to fulfill rules
 
         aka h - the minimum cost of getting to the goal from the current node
         """
-        if node is goal:
+        if node is self.goal:
             return 0
 
         # all locked in assignments
         assigned_signups = {signup for signup, role_id in node}
-        role_count = get_role_counts([role for signup, role in node]
-                                     + [roles_by_id[signup_role.role_id]
-                                        for signup in signups if signup not in assigned_signups
-                                        for signup_role in signup.roles])
+        role_count = self.get_role_counts([role for signup, role in node]
+                                          + [self.roles_by_id[signup_role.role_id]
+                                             for signup in self.signups if signup not in assigned_signups
+                                             for signup_role in signup.roles])
 
         # given all possible assignments, which rules are impossible to satisfy?
         total_cost = 0
-        for rule in game_session.all_rules:
+        for rule in self.game_session.all_rules:
             num_people = role_count[rule.role_id]
             if num_people > rule.value:
                 continue
@@ -254,57 +259,56 @@ def solve_roles(game_session, signups):
 
         return total_cost
 
-    start = frozenset()
-    frontier = {start}
+    def solve(self):
+        """
+        :rtype: frozenset[tuple[schemas.GameSignupFull, schemas.GameSessionRole]]
+        """
+        start = frozenset()
+        frontier = {start}
 
-    g_score = collections.defaultdict(lambda: float('inf'))
-    g_score[start] = 0
-    f_score = collections.defaultdict(lambda: float('inf'))
-    f_score[start] = 0
-    best_solution = start
-    i = 0
+        g_score = collections.defaultdict(lambda: float('inf'))
+        g_score[start] = 0
+        f_score = collections.defaultdict(lambda: float('inf'))
+        f_score[start] = 0
+        best_solution = start
+        i = 0
 
-    while len(frontier):
-        current = min([(node, f_score[node]) for node in frontier], key=lambda n: n[1])[0]
+        while len(frontier):
+            current = min([(node, f_score[node]) for node in frontier], key=lambda n: n[1])[0]
 
-        if DEBUG_ASTAR:
-            print(f"Current ({f_score[current]}): ", end='')
-            print_node(current)
-            print("Options:\n")
-
-        if current is goal:
             if DEBUG_ASTAR:
-                print("\nSolution!")
-                print_node(best_solution)
-            return best_solution
+                print(f"Current ({f_score[current]}): ", end='')
+                self.print_node(current)
+                print("Options:\n")
 
-        frontier.remove(current)
-        for neighbor in neighbors(current):
-            tentative_g_score = assigned_cost(neighbor, current)
-            if tentative_g_score < g_score[neighbor]:
-                if neighbor is goal:
-                    best_solution = current
-                g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = g_score[neighbor] + speculative_cost(neighbor) - ((0.0001 * len(current)) + 0.0001)
-                frontier.add(neighbor)
-
+            if current is self.goal:
                 if DEBUG_ASTAR:
-                    print_node(neighbor)
-                    print(f"gscore: {g_score[neighbor]}, fscore: {f_score[neighbor]}")
-        if DEBUG_ASTAR:
-            i += 1
-            print(f"\n  ======== Done with iteration {i}, frontier size = {len(frontier)} ========\n")
-    raise RuntimeError("this should never happen")
+                    print("\nSolution!")
+                    self.print_node(best_solution)
+                return best_solution
 
+            frontier.remove(current)
+            for neighbor in self.neighbors(current):
+                tentative_g_score = self.assigned_cost(neighbor, current)
+                if tentative_g_score < g_score[neighbor]:
+                    if neighbor is self.goal:
+                        best_solution = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = g_score[neighbor] + self.speculative_cost(neighbor) \
+                                        - ((0.0001 * len(current)) + 0.0001)
+                    frontier.add(neighbor)
 
-# ==== helpers ====
-def is_available(signup, offset):
-    """Whether or not the given signup is available at the given instant."""
-    return any(t.offset <= offset < t.offset + t.duration for t in signup.times)
+                    if DEBUG_ASTAR:
+                        self.print_node(neighbor)
+                        print(f"gscore: {g_score[neighbor]}, fscore: {f_score[neighbor]}")
+            if DEBUG_ASTAR:
+                i += 1
+                print(f"\n  ======== Done with iteration {i}, frontier size = {len(frontier)} ========\n")
+        raise RuntimeError("this should never happen")
 
-
-def print_node(node, after=''):
-    try:
-        print(", ".join(f"{s.id} on {r.name if r else 'none'}" for s, r in node) + after)
-    except:
-        print("goal" + after)
+    @staticmethod
+    def print_node(node, after=''):
+        try:
+            print(", ".join(f"{s.id} on {r.name if r else 'none'}" for s, r in node) + after)
+        except Exception:
+            print("goal" + after)
