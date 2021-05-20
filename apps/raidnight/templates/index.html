@@ -1,11 +1,12 @@
 [[extend 'layout.html']]
 
 <div class="section" style="margin-top: 50px">
-  <div class="vars">
-    DEBUG <br>
-    SIGNED UP: <pre style="white-space: pre-wrap">[[=signed_up_sessions]]</pre>
-    OWNED: <pre style="white-space: pre-wrap">[[=owned_sessions]]</pre>
-  </div>
+    <div class="vars">
+      DEBUG <br>
+      SIGNED UP: <pre style="white-space: pre-wrap">[[=signed_up_sessions]]</pre>
+      OWNED: <pre style="white-space: pre-wrap">[[=owned_sessions]]</pre>
+    </div>
+
     [[if user:]]
     <div class="session">
         <div class="title">
@@ -13,76 +14,91 @@
         </div>
         <div class="blocks">
 
-            [[for session in sessions:]]
+
             <div class="block">
+                [[for session in sessions:]]
                 <div class="columns">
-                    <div class="column is-four-fifths">
+                    <div class="column is-two-thirds">
                         <h1 class="subtitle">Name: [[=session.name]]</h1>
                         <p>Description: [[=session.description]]</p>
-
-
                     </div>
-                    <div class="column" style="padding-left: 80px">
-                        [[if session.selected_time_offset:]]
-                        <span class="tag is-size-6">
-                            Assigned
-                        </span>
-                        [[else:]]
-                        <span class="tag is-size-6">
-                            Awaiting
-                        </span>
+
+                    <div class="column">
+    <!--                    <div class="column" > style="padding-left: 80px"-->
+
+                            [[if session.selected_time_offset:]]
+                            <span class="tag is-size-6">
+                                Assigned
+                            </span>
+                            [[else:]]
+                            <span class="tag is-size-6">
+                                Awaiting
+                            </span>
+                            [[pass]]
+
+                            <div class="level">
+                                <div class="level-left">
+                                    <a class="button" href="[[=URL('sessions', session.id)]]">
+                                        View
+                                    </a>
+                                <div class="level-right">
+                                    <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
+                                        Edit
+                                    </a>
+                                </div>
+                            <div>
+
+                    </div> <!-- second column -->
+                </div> <!-- columns -->
+
+            </div> <!-- block -->
                         [[pass]]
-                    </div>
-                </div>
-            </div>
-            [[pass]]
+        </div><!-- blocks -->
 
-<!--            static-->
-            <div class="block">
-                <div class="columns">
-                    <div class="column is-four-fifths">
-                        <h1 class="subtitle">Name</h1>
-                        <p>description</p>
-                        <p>presets</p>
-                        <p>time</p>
-                        <p>role</p>
-                    </div>
-                    <div class="column" style="padding-left: 80px">
-                        <span class="tag is-size-6">
-                            Assigned
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="block">
-                <div class="columns">
-                    <div class="column is-four-fifths">
-                        <h1 class="subtitle">Name</h1>
-                        <p>description</p>
-                        <p>presets</p>
-                        <p>time</p>
-                        <p>role</p>
-                    </div>
-                    <div class="column" style="padding-left: 80px">
-                        <span class="tag is-size-6">
-                            <p>Past</p>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
+    </div>   <!-- session-->
     [[else:]]
-    <div>
-        <p>introduction</p>
-    </div>
+        <div>
+            <p>introduction</p>
+        </div>
     [[pass]]
 
+</div> <!-- out-->
+
+<!--            static-->
+<!--            <div class="block">-->
+<!--                <div class="columns">-->
+<!--                    <div class="column is-four-fifths">-->
+<!--                        <h1 class="subtitle">Name</h1>-->
+<!--                        <p>description</p>-->
+<!--                        <p>presets</p>-->
+<!--                        <p>time</p>-->
+<!--                        <p>role</p>-->
+<!--                    </div>-->
+<!--                    <div class="column" style="padding-left: 80px">-->
+<!--                        <span class="tag is-size-6">-->
+<!--                            Assigned-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+
+<!--            <div class="block">-->
+<!--                <div class="columns">-->
+<!--                    <div class="column is-four-fifths">-->
+<!--                        <h1 class="subtitle">Name</h1>-->
+<!--                        <p>description</p>-->
+<!--                        <p>presets</p>-->
+<!--                        <p>time</p>-->
+<!--                        <p>role</p>-->
+<!--                    </div>-->
+<!--                    <div class="column" style="padding-left: 80px">-->
+<!--                        <span class="tag is-size-6">-->
+<!--                            <p>Past</p>-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
 
 
 
-</div>

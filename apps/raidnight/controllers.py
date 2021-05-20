@@ -48,7 +48,14 @@ def create_session():
 @action('sessions/<session_id:int>')
 @action.uses("sessions/view.html", db, session, auth)
 def view_session(session_id):
-    return {"user": get_user()}
+    signups = db(db.game_signups.session_id == session_id).select
+
+    game_session = db.game_sessions[session_id]
+    # signups = db.game_signups[session_id]
+    signups = dummy.signups
+    if game_session is None:
+        abort(404, "Session not found")
+    return {"user": get_user(), "session_id": session_id, "game_session": game_session, "signups": signups}
 
 
 @action('sessions/<session_id:int>/edit')
