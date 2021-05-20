@@ -1,7 +1,7 @@
 """
 This file contains some dummy data for use in developing the frontend.
 """
-from . import presets
+from . import schemas
 from . import schemas
 
 class Dummy:
@@ -26,8 +26,6 @@ session2 = objectify({
     'id': 2, 'name': 'Test 2', 'description': lipsum, 'owner_id': 2, 'selected_time_offset': None,
     'selected_time_duration': None, 'selected_time_timezone': None
 })
-
-
 
 full_session = schemas.GameSessionFull.parse_obj({
     "all_roles": [
@@ -1520,6 +1518,8 @@ full_session = schemas.GameSessionFull.parse_obj({
 })
 full_session_roles = {r.name: r.id for r in full_session.all_roles}
 full_session_roles_by_id = {r.id: r.name for r in full_session.all_roles}
+
+
 # data from real signup sessions on when2meet
 def signup(name, offset_and_durations, wanted_roles=[], ok_roles=[]):
     class DummySignup(schemas.GameSignupFull):
@@ -1608,4 +1608,49 @@ signups = [
     #         (17 + 144, 4)],
     #        ["White Mage",],
     #        ["Scholar"]),
+]
+
+signups2 = [
+    signup("Sazri", [(10, 12),
+                     (10 + 24, 7),
+                     (10 + 48, 7),
+                     (10 + 72, 7),
+                     (10 + 96, 12),
+                     (10 + 120, 12),
+                     (10 + 144, 6)]),
+    signup("Tahla", [(10, 12),
+                     (17 + 24, 5),
+                     (18 + 48, 4),
+                     (17 + 72, 5),
+                     (18 + 96, 4),
+                     (17 + 120, 5),
+                     (10 + 144, 12)]),
+    signup("Zeke", [(10, 12),
+                    (17 + 24, 0.75), (18.25 + 24, 3.75),
+                    (17 + 72, 0.75), (18.25 + 72, 3.75),
+                    (17 + 96, 0.75), (18.25 + 96, 3.75),
+                    (17 + 120, 0.75), (18.25 + 120, 3.75),
+                    (10 + 144, 12)]),
+    signup("Kai", [(12, 5.5),
+                   (17.5 + 24, 4.5),
+                   (21 + 48, 1),
+                   (16 + 72, 5),
+                   (21 + 96, 1),
+                   (12 + 144, 4)]),
+    signup("Wyse", [(12, 10),
+                    (10 + 24, 5),
+                    (10 + 72, 12),
+                    (10 + 96, 2),
+                    (10 + 120, 12),
+                    (10 + 144, 12)]),
+    signup("Ventaile", [(16.5, 4.5),
+                        (16 + 24, 5),
+                        (20 + 96, 1),
+                        (18 + 120, 3),
+                        (16 + 144, 5)]),
+    signup("Thancwed", [(14 + 24, 6),
+                        (10 + 48, 12),
+                        (10 + 96, 6), (18 + 96, 4),
+                        (13 + 120, 9),
+                        (14 + 144, 8)])
 ]

@@ -104,6 +104,9 @@ class GameSessionRole(BaseModel):
     children: List[GameSessionRole]
     rules: List[GameSessionRule]
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 class GameSessionInvite(BaseModel):
     id: int
@@ -127,8 +130,16 @@ class GameSessionFull(BaseModel):
 
 # ---- signup ----
 class GameSignupFull(EditSignup):
+    id: int
     user: Optional[DiscordUser]
     anonymous_name: Optional[str]
+
+    def __hash__(self):
+        return hash(self.id)
+
+    @property
+    def username(self):
+        return self.anonymous_name or self.user.username
 
 
 # forward refs
