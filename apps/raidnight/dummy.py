@@ -2,7 +2,7 @@
 This file contains some dummy data for use in developing the frontend.
 """
 from . import schemas
-from . import schemas
+
 
 class Dummy:
     def __repr__(self):
