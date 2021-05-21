@@ -1,68 +1,69 @@
 [[extend 'layout.html']]
 
-<div class="section" style="margin-top: 50px">
-    <div class="vars">
-      DEBUG <br>
-      SIGNED UP: <pre style="white-space: pre-wrap">[[=signed_up_sessions]]</pre>
-      OWNED: <pre style="white-space: pre-wrap">[[=owned_sessions]]</pre>
+<div class="section">
+  <!--  <div class="vars">-->
+  <!--    DEBUG <br>-->
+  <!--    SIGNED UP:-->
+  <!--    <pre style="white-space: pre-wrap">[[=signed_up_sessions]]</pre>-->
+  <!--    OWNED:-->
+  <!--    <pre style="white-space: pre-wrap">[[=owned_sessions]]</pre>-->
+  <!--  </div>-->
+
+  [[if user:]]
+  <div class="session">
+    <div class="title">
+      <h1 class="title is-size-2">Session</h1>
     </div>
 
-    [[if user:]]
-    <div class="session">
-        <div class="title">
-            <h1 class="title is-size-2">Session</h1>
-        </div>
-        <div class="blocks">
+    <div class="blocks">
+      <div class="block">
+        [[for session in sessions:]]
+        <div class="columns">
+          <div class="column is-two-thirds">
+            <h1 class="subtitle">Name: [[=session.name]]</h1>
+            <p>Description: [[=session.description]]</p>
+          </div>
 
+          <div class="column">
+            <!--                    <div class="column" > style="padding-left: 80px"-->
 
-            <div class="block">
-                [[for session in sessions:]]
-                <div class="columns">
-                    <div class="column is-two-thirds">
-                        <h1 class="subtitle">Name: [[=session.name]]</h1>
-                        <p>Description: [[=session.description]]</p>
-                    </div>
-
-                    <div class="column">
-    <!--                    <div class="column" > style="padding-left: 80px"-->
-
-                            [[if session.selected_time_offset:]]
-                            <span class="tag is-size-6">
+            [[if session.selected_time_offset:]]
+            <span class="tag is-size-6">
                                 Assigned
                             </span>
-                            [[else:]]
-                            <span class="tag is-size-6">
+            [[else:]]
+            <span class="tag is-size-6">
                                 Awaiting
                             </span>
-                            [[pass]]
+            [[pass]]
 
-                            <div class="level">
-                                <div class="level-left">
-                                    <a class="button" href="[[=URL('sessions', session.id)]]">
-                                        View
-                                    </a>
-                                <div class="level-right">
-                                    <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
-                                        Edit
-                                    </a>
-                                </div>
-                            <div>
+            <div class="level">
+              <div class="level-left">
+                <a class="button" href="[[=URL('sessions', session.id)]]">
+                  View
+                </a>
+                <div class="level-right">
+                  <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
+                    Edit
+                  </a>
+                </div>
+                <div>
 
-                    </div> <!-- second column -->
-                </div> <!-- columns -->
+                </div> <!-- second column -->
+              </div> <!-- columns -->
 
             </div> <!-- block -->
-                        [[pass]]
-        </div><!-- blocks -->
+            [[pass]]
+          </div><!-- blocks -->
 
-    </div>   <!-- session-->
-    [[else:]]
+        </div>   <!-- session-->
+        [[else:]]
         <div>
-            <p>introduction</p>
+          <p>introduction</p>
         </div>
-    [[pass]]
+        [[pass]]
 
-</div> <!-- out-->
+      </div> <!-- out-->
 
 <!--            static-->
 <!--            <div class="block">-->
