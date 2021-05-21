@@ -1,0 +1,12 @@
+.has-background-splash {
+    background-image: url("../img/splash.png");
+    background-size: cover;
+}
+
+.has-background-translucent {
+    max-width: 100%;
+    width: fit-content;
+    padding: 1rem;
+    background: rgba(0, 0, 30, 0.4);
+    border-radius: 0 8px 0 0;
+}
