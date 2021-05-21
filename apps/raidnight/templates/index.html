@@ -16,8 +16,8 @@
     </div>
 
     <div class="blocks">
+      [[for session in sessions:]]
       <div class="block">
-        [[for session in sessions:]]
         <div class="columns">
           <div class="column is-two-thirds">
             <h1 class="subtitle">Name: [[=session.name]]</h1>
@@ -42,28 +42,30 @@
                 <a class="button" href="[[=URL('sessions', session.id)]]">
                   View
                 </a>
-                <div class="level-right">
-                  <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
-                    Edit
-                  </a>
-                </div>
-                <div>
+              </div>
+              <div class="level-right">
+                <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
+                  Edit
+                </a>
+              </div>
+            </div>
+          </div>
+          <div>
 
-                </div> <!-- second column -->
-              </div> <!-- columns -->
+          </div> <!-- second column -->
+        </div> <!-- columns -->
+      </div> <!-- block -->
+      [[pass]]
+    </div><!-- blocks -->
 
-            </div> <!-- block -->
-            [[pass]]
-          </div><!-- blocks -->
+  </div>   <!-- session-->
+  [[else:]]
+  <div>
+    <p>introduction</p>
+  </div>
+  [[pass]]
 
-        </div>   <!-- session-->
-        [[else:]]
-        <div>
-          <p>introduction</p>
-        </div>
-        [[pass]]
-
-      </div> <!-- out-->
+</div> <!-- out-->
 
 <!--            static-->
 <!--            <div class="block">-->
