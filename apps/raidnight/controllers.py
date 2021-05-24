@@ -3,7 +3,9 @@ from pydantic import ValidationError
 
 from . import dummy, matchmaking, presets, schemas
 from .fixtures import auth, db, session, url_signer
-from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, success
+from .matchmaking import load_all_signups
+from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, \
+    is_owner, is_owner_or_signed_up, success
 
 
 # ==== pages ====
@@ -24,10 +26,10 @@ def index():
             if game_session.owner_id != user.id:  # if we own the session, it's already in owned_sessions
                 signed_up_sessions.append(game_session)
 
-        # todo remove me: dummy data
-        owned_sessions.append(dummy.session1)
-        signed_up_sessions.append(dummy.session2)
-        signed_up_sessions.append(dummy.full_session)
+        # # todo remove me: dummy data
+        # owned_sessions.append(dummy.session1)
+        # signed_up_sessions.append(dummy.session2)
+        # signed_up_sessions.append(dummy.full_session)
         sessions = owned_sessions + signed_up_sessions
         sessions = sorted(sessions, key=lambda s: s.id, reverse=True)
 
@@ -49,26 +51,22 @@ def create_session():
 @action.uses("sessions/view.html", db, session, auth)
 def view_session(session_id):
     user = get_user()
-    signups = db(db.game_signups.session_id == session_id).select()
-    game_session = db.game_sessions[session_id]
-    print(signups)
+    game_session = get_game_session_full(db, session_id)
+    game_signups = load_all_signups(db, session_id)
+    print(game_signups)
     # signups = dummy.signups
 
     if game_session is None:
         abort(404, "Session not found")
-    # todo: check signups
-    if game_session.owner_id is not None and user != game_session.owner_id:
-       abort(403, "You do not have permission to view this session")
-
-    game_invite = db(db.game_invites.session_id == session_id).select().first()
-    key = game_invite.key
+    if not is_owner_or_signed_up(game_session, game_signups, user):
+        abort(403, "You do not have permission to view this session")
 
     return {
         "user": get_user(),
         "session_id": session_id,
         "game_session": game_session,
-        "signups": signups,
-        "key": key,
+        "signups": game_signups,
+        "key": game_session.invite_key,
     }
 
 
@@ -80,7 +78,7 @@ def edit_session(session_id):
     game_session = db.game_sessions[session_id]
     if game_session is None:
         abort(404, "Session not found")
-    if game_session.owner_id is not None and user != game_session.owner_id:
+    if not is_owner(game_session, user):
         abort(403, "You do not have permission to edit this session")
     return {"user": get_user(), "session_id": session_id}
 
@@ -162,8 +160,8 @@ def invite(invite_key):
 def delete_session(session_id=None):
     user = get_user()
     game_session = db.game_sessions[session_id]
-    if game_session.owner_id is not None and user != game_session.owner_id:
-            abort(403, "You do not have permission to delete this session")
+    if not is_owner(game_session, user):
+        abort(403, "You do not have permission to delete this session")
     db(db.game_sessions.id == session_id).delete()
 
     redirect(URL('index'))
@@ -229,6 +227,10 @@ def api_update_session(session_id=None):
     except ValidationError as e:
         return error(422, str(e))
 
+    game_session = get_game_session_full(db, session_id)
+    if not is_owner(game_session, user):
+        return error(403, "You do not have permission to edit this session")
+
     # update database
     # game session
     # update name, description
@@ -248,9 +250,10 @@ def api_update_session(session_id=None):
 def api_get_session(session_id):
     user = get_user()
     game_session = get_game_session_full(db, session_id)
+    game_signups = load_all_signups(db, session_id)
     if game_session is None:
         return error(404, "Session not found")
-    if game_session.owner is not None and user != game_session.owner.id:
+    if not is_owner_or_signed_up(game_session, game_signups, user):
         return error(403, "You do not have permission to view this session")
     return success(game_session.dict())
 
