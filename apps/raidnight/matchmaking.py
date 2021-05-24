@@ -81,7 +81,7 @@ def find_timespans(signups):
     out = []  # list of triples (start, stop, ids)
     buffer = []  # list of pairs (start_time, available (set of ids))
     for event_time in event_offsets:
-        available_set = {s.id for s in signups if is_available(s, event_time)}
+        available_set = {s for s in signups if is_available(s, event_time)}
         # pop any that are not subsets of the current available set
         for item in buffer[:]:
             start_time, ids = item

@@ -48,14 +48,28 @@ def create_session():
 @action('sessions/<session_id:int>')
 @action.uses("sessions/view.html", db, session, auth)
 def view_session(session_id):
-    signups = db(db.game_signups.session_id == session_id).select
-
+    user = get_user()
+    signups = db(db.game_signups.session_id == session_id).select()
     game_session = db.game_sessions[session_id]
-    # signups = db.game_signups[session_id]
-    signups = dummy.signups
+    print(signups)
+    # signups = dummy.signups
+
     if game_session is None:
         abort(404, "Session not found")
-    return {"user": get_user(), "session_id": session_id, "game_session": game_session, "signups": signups}
+    # todo: check signups
+    if game_session.owner_id is not None and user != game_session.owner_id:
+       abort(403, "You do not have permission to view this session")
+
+    game_invite = db(db.game_invites.session_id == session_id).select().first()
+    key = game_invite.key
+
+    return {
+        "user": get_user(),
+        "session_id": session_id,
+        "game_session": game_session,
+        "signups": signups,
+        "key": key,
+    }
 
 
 @action('sessions/<session_id:int>/edit')
@@ -143,6 +157,16 @@ def invite(invite_key):
         "existing_signup": existing_signup
     }
 
+@action('sessions/<session_id:int>/delete')
+@action.uses(db, session, auth)
+def delete_session(session_id=None):
+    user = get_user()
+    game_session = db.game_sessions[session_id]
+    if game_session.owner_id is not None and user != game_session.owner_id:
+            abort(403, "You do not have permission to delete this session")
+    db(db.game_sessions.id == session_id).delete()
+
+    redirect(URL('index'))
 
 # ==== API ====
 @action('api/presets')
@@ -272,6 +296,28 @@ def api_update_signup(signup_id):
         db.game_signup_roles.insert(signup_id=signup_id, **role.dict())
 
     return success({'id': signup_id})
+
+@action('test/matchmaking/<session_id:int>')
+@action.uses(db)
+def test_matchmaking(session_id):
+    signups = matchmaking.load_all_signups(db, session_id)
+    signups = dummy.signups
+    session = get_game_session_full(db, 8)
+    solution = matchmaking.RoleSolver(session, signups).solve()
+    solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
+    return success(solution_list)
+
+    return success(matchmaking.find_timespans(signups))
+
+@action('test/matchmaking2')
+@action.uses(db)
+def test_matchmaking2():
+    signups = dummy.signups
+    session = get_game_session_full(db, 8)
+    solution = matchmaking.RoleSolver(session, signups).solve()
+    solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
+    return success(solution_list)
+
 
 
 # ==== dev test ====
