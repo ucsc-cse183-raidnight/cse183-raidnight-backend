@@ -27,6 +27,16 @@ def get_user():
     return DiscordUser(id=user['id'], username=user['username'], email=user['email'], avatar_hash=user['last_name'])
 
 
+def is_owner(game_session, user):
+    return game_session.owner is None or user == game_session.owner.id
+
+
+def is_owner_or_signed_up(game_session, game_signups, user):
+    user_in_signups = user in [s.user for s in game_signups]
+    has_anonymous_signup = any(s.user is None for s in game_signups)
+    return is_owner(game_session, user) or user_in_signups or has_anonymous_signup
+
+
 def generate_invite_key():
     return secrets.token_urlsafe(5)
 
