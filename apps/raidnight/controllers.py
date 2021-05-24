@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from . import dummy, matchmaking, presets, schemas
 from .fixtures import auth, db, session, url_signer
+from .matchmaking import load_all_signups
 from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, success
 
 
@@ -49,15 +50,16 @@ def create_session():
 @action.uses("sessions/view.html", db, session, auth)
 def view_session(session_id):
     user = get_user()
-    signups = db(db.game_signups.session_id == session_id).select()
-    game_session = db.game_sessions[session_id]
-    print(signups)
+    game_session = get_game_session_full(db, session_id)
+    game_signups = load_all_signups(db, session_id)
+    print(game_signups)
     # signups = dummy.signups
 
     if game_session is None:
         abort(404, "Session not found")
     # todo: check signups
-    if game_session.owner_id is not None and user != game_session.owner_id:
+    if game_session.owner is not None \
+            and not (user == game_session.owner.id or user in [s.user for s in game_signups]):
        abort(403, "You do not have permission to view this session")
 
     game_invite = db(db.game_invites.session_id == session_id).select().first()
@@ -67,7 +69,7 @@ def view_session(session_id):
         "user": get_user(),
         "session_id": session_id,
         "game_session": game_session,
-        "signups": signups,
+        "signups": game_signups,
         "key": key,
     }
 
@@ -248,9 +250,10 @@ def api_update_session(session_id=None):
 def api_get_session(session_id):
     user = get_user()
     game_session = get_game_session_full(db, session_id)
+    game_signups = load_all_signups(db, session_id)
     if game_session is None:
         return error(404, "Session not found")
-    if game_session.owner is not None and user != game_session.owner.id:
+    if game_session.owner is not None and not (user == game_session.owner.id or user in [s.user for s in game_signups]):
         return error(403, "You do not have permission to view this session")
     return success(game_session.dict())
 

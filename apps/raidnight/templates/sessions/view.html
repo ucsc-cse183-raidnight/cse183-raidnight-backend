@@ -7,7 +7,7 @@
 
 
     <div class="block mt-3 mx-6">
-        [[if user == game_session.owner_id:]]
+        [[if user == game_session.owner:]]
         <div class="level-right">
             <div class="field has-addons">
                 <div class="control">
@@ -52,7 +52,7 @@
                             <p>[[=signup.anonymous_name]]</p>
                             [[pass]]
                         </div>
-                        [[if user == signup.user_id:]]
+                        [[if user == signup.user:]]
                         <div class="level-right ml-3">
                             <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
                                href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
@@ -70,7 +70,7 @@
 
 
         <div class="mt-3 level-right">
-            [[if user == game_session.owner_id:]]
+            [[if user == game_session.owner:]]
             <a class="button is-primary" href="[[=URL('sessions', session_id, 'edit')]]">
                 Edit Session
             </a>
