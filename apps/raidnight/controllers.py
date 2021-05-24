@@ -25,10 +25,10 @@ def index():
             if game_session.owner_id != user.id:  # if we own the session, it's already in owned_sessions
                 signed_up_sessions.append(game_session)
 
-        # todo remove me: dummy data
-        owned_sessions.append(dummy.session1)
-        signed_up_sessions.append(dummy.session2)
-        signed_up_sessions.append(dummy.full_session)
+        # # todo remove me: dummy data
+        # owned_sessions.append(dummy.session1)
+        # signed_up_sessions.append(dummy.session2)
+        # signed_up_sessions.append(dummy.full_session)
         sessions = owned_sessions + signed_up_sessions
         sessions = sorted(sessions, key=lambda s: s.id, reverse=True)
 
@@ -57,20 +57,16 @@ def view_session(session_id):
 
     if game_session is None:
         abort(404, "Session not found")
-    # todo: check signups
     if game_session.owner is not None \
             and not (user == game_session.owner.id or user in [s.user for s in game_signups]):
        abort(403, "You do not have permission to view this session")
-
-    game_invite = db(db.game_invites.session_id == session_id).select().first()
-    key = game_invite.key
 
     return {
         "user": get_user(),
         "session_id": session_id,
         "game_session": game_session,
         "signups": game_signups,
-        "key": key,
+        "key": game_session.invite_key,
     }
 
 
