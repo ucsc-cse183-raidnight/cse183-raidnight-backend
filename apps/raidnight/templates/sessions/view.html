@@ -46,8 +46,8 @@
                     [[for signup in signups:]]
                     <div class="level">
                         <div class="level-left">
-                            [[if signup.id:]]
-                            <p>[[=signup.id]]</p>
+                            [[if signup.user_id:]]
+                            <p>[[=signup.user_id]]</p>
                             [[else:]]
                             <p>[[=signup.anonymous_name]]</p>
                             [[pass]]
