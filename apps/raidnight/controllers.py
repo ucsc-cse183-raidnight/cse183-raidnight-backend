@@ -227,6 +227,10 @@ def api_update_session(session_id=None):
     except ValidationError as e:
         return error(422, str(e))
 
+    game_session = get_game_session_full(db, session_id)
+    if game_session.owner is not None and user != game_session.owner.id:
+        return error(403, "You do not have permission to edit this session")
+
     # update database
     # game session
     # update name, description
