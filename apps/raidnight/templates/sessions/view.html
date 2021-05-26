@@ -45,7 +45,7 @@
                     <p>[[=signup.anonymous_name]]</p>
                     [[pass]]
                 </div>
-                [[if user == signup.user:]]
+                [[if signup.user is None or user == signup.user:]]
                 <div class="level-right ml-3">
                     <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
                        href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">

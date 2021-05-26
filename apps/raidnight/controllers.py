@@ -120,12 +120,12 @@ def edit_signup(session_id, signup_id):
     return {"user": user, "signup": signup, "session_id": session_id}
 
 
-@action('sessions/<session_id:int>/join')
+@action('sessions/<session_id:int>/join', method=['GET', 'POST'])
 @action.uses(db, session, auth, url_signer.verify())
 def join_session(session_id):
     """after user confirm @ invite - verify join action, create signup, then redir to edit signup"""
-    user = get_user()  # may not exist if anonymous - check query for anonymous name
-    query = request.query
+    user = get_user()  # may not exist if anonymous - check form for anonymous name
+    query = request.forms
 
     # if user is not logged in and name is not passed to qstring, abort
     if not (user or query.get('name')):
