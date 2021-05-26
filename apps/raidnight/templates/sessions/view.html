@@ -27,9 +27,99 @@
         </div>
         [[pass]]
 
+        <div class="section">
+            <h4 class="title is-4">Description: </h4>
+            <p>[[=game_session.description]]</p>
+        </div>
+
+        <div class="section">
+            <h4 class="title is-4">Signups: </h4>
+
+
+            [[for signup in signups:]]
+            <div class="level">
+                <div class="level-left ml-6">
+                    [[if signup.user:]]
+                    <p>[[=signup.username]]</p>
+                    [[else:]]
+                    <p>[[=signup.anonymous_name]]</p>
+                    [[pass]]
+                </div>
+                [[if user == signup.user:]]
+                <div class="level-right ml-3">
+                    <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
+                       href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
+                        edit signup
+                    </a>
+                </div>
+                [[pass]]
+            </div>
+            [[pass]]
+        </div>
+
+
+        <div class="section">
+            <div>
+                <h4 class="title is-4 mb-5">Optimal times & roles: </h4>
+            </div>
+            <div class="columns">
+                [[for op in optimal:]]
+                <div class="column is-one-third">
+                    <div>
+                        <b class="tag my-2 is-medium">time: [[=op["time_start"] ]] - [[=op["time_end"] ]]</b>
+                        [[for signup, role in op["solution_list"]: ]]
+                        <div class="field has-addons">
+                            <div class="control">
+                                <tag class="tag is-normal">[[=signup]]</tag>
+                            </div>
+                            <div class="control mt-1 ml-2">
+                                <p>[[=role]]</p>
+                            </div>
+                        </div>
+                        [[pass]]
+                        <!-- delete dummy data-->
+                        <div class="field has-addons">
+                            <div class="control">
+                                <tag class="tag is-normal">[[=signup]]</tag>
+                            </div>
+                            <div class="control mt-1 ml-2">
+                                <p>[[=role]]</p>
+                            </div>
+                        </div>
+                        <div class="field has-addons">
+                            <div class="control">
+                                <tag class="tag is-normal">ddd12#3389</tag>
+                            </div>
+                            <div class="control mt-1 ml-2">
+                                <p>Paladin</p>
+                            </div>
+                        </div>
+                        <div class="field has-addons">
+                            <div class="control">
+                                <tag class="tag is-normal">ddd12#3389</tag>
+                            </div>
+                            <div class="control mt-1 ml-2">
+                                <p>Paladin</p>
+                            </div>
+                        </div>
+                        <div class="field has-addons">
+                            <div class="control">
+                                <tag class="tag is-normal">howmanycharactersisthisnotenough#3389</tag>
+                            </div>
+                            <div class="control mt-1 ml-2">
+                                <p>Paladin</p>
+                            </div>
+                        </div>
+                        <!-- dummy data-->
+                    </div>
+                </div>
+                [[pass]]
+            </div>
+        </div>
+
+        <!-- table-->
         <table>
             <tbody>
-
             <tr>
                 <td class="c1">
                     <span>Description: </span>
@@ -46,15 +136,15 @@
                     [[for signup in signups:]]
                     <div class="level">
                         <div class="level-left">
-                            [[if signup.user_id:]]
-                            <p>[[=signup.user_id]]</p>
+                            [[if signup.user:]]
+                            <p>[[=signup.username]]</p>
                             [[else:]]
                             <p>[[=signup.anonymous_name]]</p>
                             [[pass]]
                         </div>
                         [[if user == signup.user:]]
-                        <div class="level-right ml-3">
-                            <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
+                        <div class="level-right mr-6">
+                            <a class="button is-primary is-small " style="border-radius: 13px"
                                href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
                                 edit signup
                             </a>
@@ -62,6 +152,40 @@
                         [[pass]]
                     </div>
                     [[pass]]
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                    <p>ddd12#3389 Paladin</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="c1">
+                    <span>Optimal times & roles: </span>
+                </td>
+                <td class="c2">
+                    [[for op in optimal:]]
+                    <div>
+                        <!-- <p>optimal time: </p>-->
+                        <b class="tag mt-2">time: [[=op["time_start"] ]] - [[=op["time_end"] ]]</b>
+                        <!-- <p>optimal roles</p>-->
+                        [[for signup, role in op["solution_list"]: ]]
+                        <p>[[=signup]] [[=role]]</p>
+                        <p>howmanycharactersisthisguessnot Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        <p>ddd12#3389 Paladin</p>
+                        [[pass]]
+                    </div>
+                    [[pass]]
+
                 </td>
             </tr>
 

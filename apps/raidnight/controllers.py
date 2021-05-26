@@ -53,13 +53,32 @@ def view_session(session_id):
     user = get_user()
     game_session = get_game_session_full(db, session_id)
     game_signups = load_all_signups(db, session_id)
-    print(game_signups)
-    # signups = dummy.signups
 
     if game_session is None:
         abort(404, "Session not found")
     if not is_owner_or_signed_up(game_session, game_signups, user):
         abort(403, "You do not have permission to view this session")
+
+    timespans = matchmaking.find_timespans(game_signups)
+    n = 3
+    if len(timespans) < n:
+        n = len(timespans)
+    # optimal times and role assignments
+    optimal = []
+    for i in range(n):
+        time = timespans[i]
+        time_start = time[0]
+        time_end = time[1]
+        signups = time[2]
+        solution = matchmaking.RoleSolver(game_session, list(signups)).solve()
+        solution_list = [(signup.username, role.name if role else None) for signup, role in
+                         solution]
+        # return object
+        object = {}
+        object["time_start"] = time_start
+        object["time_end"] = time_end
+        object["solution_list"] = solution_list
+        optimal.append(object)
 
     return {
         "user": get_user(),
@@ -67,6 +86,7 @@ def view_session(session_id):
         "game_session": game_session,
         "signups": game_signups,
         "key": game_session.invite_key,
+        "optimal": optimal,
     }
 
 
@@ -300,27 +320,6 @@ def api_update_signup(signup_id):
 
     return success({'id': signup_id})
 
-@action('test/matchmaking/<session_id:int>')
-@action.uses(db)
-def test_matchmaking(session_id):
-    signups = matchmaking.load_all_signups(db, session_id)
-    signups = dummy.signups
-    session = get_game_session_full(db, 8)
-    solution = matchmaking.RoleSolver(session, signups).solve()
-    solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
-    return success(solution_list)
-
-    return success(matchmaking.find_timespans(signups))
-
-@action('test/matchmaking2')
-@action.uses(db)
-def test_matchmaking2():
-    signups = dummy.signups
-    session = get_game_session_full(db, 8)
-    solution = matchmaking.RoleSolver(session, signups).solve()
-    solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
-    return success(solution_list)
-
 
 
 # ==== dev test ====
@@ -346,8 +345,8 @@ def test_matchmaking(session_id):
 @action('test/matchmaking2')
 @action.uses(db)
 def test_matchmaking2():
-    signups = dummy.signups
-    session = get_game_session_full(db, 8)
+    signups = get_game_signup_full()
+    session = get_game_session_full(db, 25)
     solution = matchmaking.RoleSolver(session, signups).solve()
     solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
     return success(solution_list)
