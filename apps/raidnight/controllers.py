@@ -95,7 +95,7 @@ def view_session(session_id):
 def edit_session(session_id):
     # user must have permission to edit session, session must exist - pretty much everything here is ajax though
     user = get_user()
-    game_session = db.game_sessions[session_id]
+    game_session = get_game_session_full(db, session_id)
     if game_session is None:
         abort(404, "Session not found")
     if not is_owner(game_session, user):
@@ -179,7 +179,7 @@ def invite(invite_key):
 @action.uses(db, session, auth)
 def delete_session(session_id=None):
     user = get_user()
-    game_session = db.game_sessions[session_id]
+    game_session = get_game_session_full(db, session_id)
     if not is_owner(game_session, user):
         abort(403, "You do not have permission to delete this session")
     db(db.game_sessions.id == session_id).delete()
