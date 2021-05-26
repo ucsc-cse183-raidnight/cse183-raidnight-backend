@@ -10318,3 +10318,20 @@ div.title {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
+
+.has-border-top {
+  border-top: 1.5px solid #dadbdb;
+}
+
+.has-border-bottom {
+  border-bottom: 1.5px solid #dadbdb;
+  width: 100%;
+}
+
+.tag:not(body).is-normal {
+  font-size: 0.9rem;
+  padding-top: 0.2rem;
+  background-color: #31343a;
+  border-radius: 12px;
+  border: 1px solid #603fff;
+}

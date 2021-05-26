@@ -16,6 +16,7 @@ $grey-light: #dadbdb;
 $bright-purple: #8169ff;
 $primary: $purple;
 
+
 $scheme-main: $background;
 
 // component config
@@ -155,5 +156,25 @@ div.title {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
+
+.has-border-top{
+  border-top: 1.5px solid $grey-light;
+
+}
+.has-border-bottom {
+  border-bottom: 1.5px solid $grey-light;
+  width: 100%;
+
+}
+
+.tag:not(body).is-normal {
+  font-size: 0.9rem;
+  padding-top: 0.20rem;
+  background-color: $block;
+  border-radius: 12px;
+  border: 1px solid $purple;
+}
+
+
 
 
