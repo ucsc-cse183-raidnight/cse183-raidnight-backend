@@ -104,6 +104,10 @@ class GameSessionRole(BaseModel):
     children: List[GameSessionRole]
     rules: List[GameSessionRule]
 
+    @property
+    def icon_url(self):
+        return self.icon or 'img/noclass.png'
+
     def __hash__(self):
         return hash(self.id)
 
@@ -126,6 +130,9 @@ class GameSessionFull(BaseModel):
     all_roles: List[GameSessionRole]
     all_rules: List[GameSessionRule]
     invite_key: str
+
+    def get_role(self, role_id: int):
+        return next((r for r in self.all_roles if role_id == r.id), None)
 
 
 # ---- signup ----

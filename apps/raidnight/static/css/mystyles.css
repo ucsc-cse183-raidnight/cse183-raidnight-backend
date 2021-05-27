@@ -2182,8 +2182,8 @@ div.icon-text {
   }
 }
 .table {
-  background-color: #1e2025;
-  color: #363636;
+  background-color: rgba(0, 0, 0, 0);
+  color: #dadbdb;
 }
 .table td,
 .table th {
@@ -2297,7 +2297,7 @@ div.icon-text {
 .table thead td,
 .table thead th {
   border-width: 0 0 2px;
-  color: #363636;
+  color: #dadbdb;
 }
 .table tfoot {
   background-color: transparent;
@@ -2326,20 +2326,20 @@ div.icon-text {
   width: 100%;
 }
 .table.is-hoverable tbody tr:not(.is-selected):hover {
-  background-color: #fafafa;
+  background-color: rgba(30, 32, 37, 0.3);
 }
 .table.is-hoverable.is-striped tbody tr:not(.is-selected):hover {
-  background-color: #fafafa;
+  background-color: rgba(30, 32, 37, 0.3);
 }
 .table.is-hoverable.is-striped tbody tr:not(.is-selected):hover:nth-child(even) {
-  background-color: whitesmoke;
+  background-color: rgba(0, 0, 0, 0);
 }
 .table.is-narrow td,
 .table.is-narrow th {
   padding: 0.25em 0.5em;
 }
 .table.is-striped tbody tr:not(.is-selected):nth-child(even) {
-  background-color: #fafafa;
+  background-color: rgba(30, 32, 37, 0.3);
 }
 
 .table-container {
