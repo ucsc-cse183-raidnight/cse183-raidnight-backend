@@ -35,7 +35,10 @@
         <div class="section">
             <h4 class="title is-4">Signups: </h4>
 
-
+            [[if len(signups) == 0:]]
+            <p>There are no signups yet</p>
+            <p>Copy the invite link above to invite people</p>
+            [[else:]]
             [[for signup in signups:]]
             <div class="level">
                 <div class="level-left ml-6">
@@ -55,6 +58,7 @@
                 [[pass]]
             </div>
             [[pass]]
+            [[pass]]
         </div>
 
 
@@ -72,9 +76,11 @@
                             <div class="control">
                                 <tag class="tag is-normal">[[=signup]]</tag>
                             </div>
+
                             <div class="control mt-1 ml-2">
                                 <p>[[=role]]</p>
                             </div>
+
                         </div>
                         [[pass]]
                         <!-- delete dummy data-->
@@ -116,82 +122,6 @@
                 [[pass]]
             </div>
         </div>
-
-        <!-- table-->
-        <table>
-            <tbody>
-            <tr>
-                <td class="c1">
-                    <span>Description: </span>
-                </td>
-                <td class="c2">
-                    [[=game_session.description]]
-                </td>
-            </tr>
-            <tr>
-                <td class="c1">
-                    <span>Signups: </span>
-                </td>
-                <td class="c2">
-                    [[for signup in signups:]]
-                    <div class="level">
-                        <div class="level-left">
-                            [[if signup.user:]]
-                            <p>[[=signup.username]]</p>
-                            [[else:]]
-                            <p>[[=signup.anonymous_name]]</p>
-                            [[pass]]
-                        </div>
-                        [[if user == signup.user:]]
-                        <div class="level-right mr-6">
-                            <a class="button is-primary is-small " style="border-radius: 13px"
-                               href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
-                                edit signup
-                            </a>
-                        </div>
-                        [[pass]]
-                    </div>
-                    [[pass]]
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                    <p>ddd12#3389 Paladin</p>
-                </td>
-            </tr>
-            <tr>
-                <td class="c1">
-                    <span>Optimal times & roles: </span>
-                </td>
-                <td class="c2">
-                    [[for op in optimal:]]
-                    <div>
-                        <!-- <p>optimal time: </p>-->
-                        <b class="tag mt-2">time: [[=op["time_start"] ]] - [[=op["time_end"] ]]</b>
-                        <!-- <p>optimal roles</p>-->
-                        [[for signup, role in op["solution_list"]: ]]
-                        <p>[[=signup]] [[=role]]</p>
-                        <p>howmanycharactersisthisguessnot Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        <p>ddd12#3389 Paladin</p>
-                        [[pass]]
-                    </div>
-                    [[pass]]
-
-                </td>
-            </tr>
-
-            </tbody>
-        </table>
-
 
         <div class="mt-3 level-right">
             [[if user == game_session.owner:]]
