@@ -36,28 +36,55 @@
             <h4 class="title is-4">Signups: </h4>
 
             [[if len(signups) == 0:]]
-            <p>There are no signups yet</p>
-            <p>Copy the invite link above to invite people</p>
+            <p>There are no signups yet.</p>
+            <p>Copy the invite link above to invite people.</p>
             [[else:]]
-            [[for signup in signups:]]
-            <div class="level">
-                <div class="level-left ml-6">
-                    [[if signup.user:]]
-                    <p>[[=signup.username]]</p>
-                    [[else:]]
-                    <p>[[=signup.anonymous_name]]</p>
-                    [[pass]]
-                </div>
-                [[if user == signup.user:]]
-                <div class="level-right ml-3">
-                    <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
-                       href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
-                        edit signup
-                    </a>
-                </div>
+
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th class="pl-0">Roles</th>
+                    <th class="has-text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                [[for signup in signups:]]
+                <tr>
+                    <td>
+                        [[=signup.username]]
+                    </td>
+                    <td class="is-vcentered">
+                        <div class="columns">
+                            [[for role in signup.roles:]]
+                            <div class="column is-narrow p-0 pr-1">
+                                <figure class="image is-24x24">
+                                    [[the_role = game_session.get_role(role.role_id)]]
+                                    <img src="[[=the_role.icon_url if the_role is not None else 'img/noclass.png']]">
+                                </figure>
+                            </div>
+                            [[pass]]
+                        </div>
+                    </td>
+                    <td class="has-text-right">
+                        [[if signup.user is None or user == signup.user:]]
+
+                        <a class="button is-primary is-small edit-signup" style="border-radius: 13px"
+                           href="[[=URL('sessions', session_id, 'edit_signup', signup.id)]]">
+                            edit signup
+                        </a>
+                        [[pass]]
+                        [[if signup.user is None or user == signup.user or user == game_session.owner:]]
+                        <a class="button is-danger is-small edit-signup ml-2" style="border-radius: 13px"
+                           href="[[=URL('sessions', session_id, 'delete_signup', signup.id, signer=url_signer)]]">
+                            delete signup
+                        </a>
+                        [[pass]]
+                    </td>
+                </tr>
                 [[pass]]
-            </div>
-            [[pass]]
+                </tbody>
+            </table>
             [[pass]]
         </div>
 

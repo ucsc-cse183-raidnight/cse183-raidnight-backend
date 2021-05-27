@@ -73,6 +73,7 @@ def view_session(session_id):
         solution = matchmaking.RoleSolver(game_session, list(signups)).solve()
         solution_list = [(signup.username, role.name if role else None) for signup, role in
                          solution]
+    
         # return object
         object = {}
         object["time_start"] = time_start
