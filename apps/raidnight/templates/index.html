@@ -14,12 +14,19 @@
     <!--    <pre style="white-space: pre-wrap">[[=owned_sessions]]</pre>-->
     <!--  </div>-->
 
-  <div class="session">
-    <div class="title">
-      <h1 class="title is-size-2">Session</h1>
-    </div>
+    <div class="session">
+        <div class="title">
+            <h1 class="title is-size-2">Session</h1>
+        </div>
 
+        [[if len(sessions) == 0:]]
         <div class="blocks">
+            <p>You don't own or have signed up for any session.</p>
+            <p>Click '+' button to create one!</p>
+        </div>
+        [[else:]]
+        <div class="blocks">
+
             [[for session in sessions:]]
             <div class="block">
                 <div class="columns">
@@ -30,121 +37,124 @@
 
                     <div class="column">
                         <!--                    <div class="column" > style="padding-left: 80px"-->
-
                         <div class="level mt-6 mr-3">
+                            [[if user == session.owner_id:]]
                             <div class="level-left">
-                                <a class="button" href="[[=URL('sessions', session.id)]]">
-                                    View
-                                </a>
-                            </div>
-                            <div class="level-right">
                                 <a class="button" href="[[=URL('sessions', session.id, 'edit')]]">
                                     Edit
                                 </a>
                             </div>
+                            [[else:]]
+                            <div class="level-left"></div>
+                            [[pass]]
+                            <div class="level-right">
+                                <a class="button" href="[[=URL('sessions', session.id)]]">
+                                    View
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div>
-
-                    </div> <!-- second column -->
                 </div> <!-- columns -->
             </div> <!-- block -->
             [[pass]]
         </div><!-- blocks -->
-  </div>   <!-- session-->
+        [[pass]]
+    </div>   <!-- session-->
 </div> <!-- out-->
 
 <!-- ========== Not logged in: CTA ============ -->
 [[else:]]
 <section class="hero is-large has-background-splash">
-  <div class="hero-body">
-    <!-- empty div for layout purposes -->
-  </div>
-  <div class="hero-foot">
-    <div class="has-background-translucent">
-      <p class="title">
-        Raidnight
-      </p>
-      <p class="subtitle">
-        A better way to find time to play with your friends.
-      </p>
+    <div class="hero-body">
+        <!-- empty div for layout purposes -->
     </div>
-  </div>
+    <div class="hero-foot">
+        <div class="has-background-translucent">
+            <p class="title">
+                Raidnight
+            </p>
+            <p class="subtitle">
+                A better way to find time to play with your friends.
+            </p>
+        </div>
+    </div>
 </section>
 
 <section class="section">
-  <div class="columns">
-    <div class="column is-three-fifths">
-      <h2 class="title">
-        Intuitive.
-      </h2>
-      <p class="subtitle">
-        Quick to set up and intuitive to use, Raidnight will find the time that works best for you and your
-        friends. Built to help bring friends together to play Final Fantasy 14, Raidnight offers
-        presets to get you started in seconds.
-      </p>
+    <div class="columns">
+        <div class="column is-three-fifths">
+            <h2 class="title">
+                Intuitive.
+            </h2>
+            <p class="subtitle">
+                Quick to set up and intuitive to use, Raidnight will find the time that works best for you and your
+                friends. Built to help bring friends together to play Final Fantasy 14, Raidnight offers
+                presets to get you started in seconds.
+            </p>
+        </div>
+        <div class="column">
+            <img src="img/front_1.png">
+        </div>
     </div>
-    <div class="column">
-      <img src="img/front_1.png">
-    </div>
-  </div>
 </section>
 
 <section class="section">
-  <div class="columns">
-    <div class="column">
-      <img src="img/front_2.png">
+    <div class="columns">
+        <div class="column">
+            <img src="img/front_2.png">
+        </div>
+        <div class="column is-three-fifths">
+            <h2 class="title">
+                Smart.
+            </h2>
+            <p class="subtitle">
+                Who's the healer again? No more shuffling roles - Raidnight finds not just the best time, but the best
+                role for
+                each person to play, too.
+            </p>
+        </div>
     </div>
-    <div class="column is-three-fifths">
-      <h2 class="title">
-        Smart.
-      </h2>
-      <p class="subtitle">
-        Who's the healer again? No more shuffling roles - Raidnight finds not just the best time, but the best role for
-        each person to play, too.
-      </p>
-    </div>
-  </div>
 </section>
 
 <section class="section">
-  <div class="columns">
-    <div class="column is-three-fifths">
-      <h2 class="title">
-        Customizable.
-      </h2>
-      <p class="subtitle">
-        Don't play FFXIV? The role system is completely customizable - you can use Raidnight for D&amp;D, WoW, meetings,
-        or any other time you might need to bring together a group of people!
-      </p>
+    <div class="columns">
+        <div class="column is-three-fifths">
+            <h2 class="title">
+                Customizable.
+            </h2>
+            <p class="subtitle">
+                Don't play FFXIV? The role system is completely customizable - you can use Raidnight for D&amp;D, WoW,
+                meetings,
+                or any other time you might need to bring together a group of people!
+            </p>
+        </div>
+        <div class="column">
+            <img src="img/front_3.png">
+        </div>
     </div>
-    <div class="column">
-      <img src="img/front_3.png">
-    </div>
-  </div>
 </section>
 
 <section class="section has-text-centered">
-  <h2 class="title">
-    Get Started
-  </h2>
+    <h2 class="title">
+        Get Started
+    </h2>
 
-  <div class="level">
-    <div class="level-item">
-      <div class="field is-grouped is-centered">
-        <p class="control">
-          <a class="button is-primary" href="[[=URL('auth/plugin/oauth2discord/login')]]">
-            Log in with Discord
-          </a>
-        </p>
-        <p class="control">
-          <a class="button is-primary" href="[[=URL('sessions/new')]]">
-            Create a Session
-          </a>
-        </p>
-      </div>
+    <div class="level">
+        <div class="level-item">
+            <div class="field is-grouped is-centered">
+                <p class="control">
+                    <a class="button is-primary" href="[[=URL('auth/plugin/oauth2discord/login')]]">
+                        Log in with Discord
+                    </a>
+                </p>
+                <p class="control">
+                    <a class="button is-primary" href="[[=URL('sessions/new')]]">
+                        Create a Session
+                    </a>
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 [[pass]]
