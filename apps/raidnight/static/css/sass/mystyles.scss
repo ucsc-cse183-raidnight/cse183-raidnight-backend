@@ -24,6 +24,13 @@ $input-color: $grey-light;
 $label-color: $grey-light;
 $button-color: $grey-light;
 
+$table-color: $text;
+$table-background-color: rgb(0, 0, 0, 0);
+$table-head-cell-color: $text;
+$table-striped-row-even-background-color: transparentize($background, 0.7);
+$table-row-hover-background-color: $table-striped-row-even-background-color;
+$table-striped-row-even-hover-background-color: $table-background-color;
+
 @import "../bulma/bulma.sass";
 
 $navbar-height: 3.7rem;
@@ -157,10 +164,11 @@ div.title {
   padding-right: 0.5em;
 }
 
-.has-border-top{
+.has-border-top {
   border-top: 1.5px solid $grey-light;
 
 }
+
 .has-border-bottom {
   border-bottom: 1.5px solid $grey-light;
   width: 100%;

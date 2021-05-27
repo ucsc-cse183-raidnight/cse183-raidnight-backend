@@ -88,6 +88,7 @@ def view_session(session_id):
         "signups": game_signups,
         "key": game_session.invite_key,
         "optimal": optimal,
+        "url_signer": url_signer
     }
 
 
@@ -121,12 +122,36 @@ def edit_signup(session_id, signup_id):
     return {"user": user, "signup": signup, "session_id": session_id}
 
 
-@action('sessions/<session_id:int>/join')
+@action('sessions/<session_id:int>/delete_signup/<signup_id:int>')
+@action.uses(db, session, auth, url_signer.verify())
+def delete_signup(session_id, signup_id):
+    game_session = db.game_sessions[session_id]
+    signup = db.game_signups[signup_id]
+    user = get_user()
+    if game_session is None or signup is None:
+        abort(404, "Signup not found")
+
+    # if the signup is from a user, make sure that that user is the current user
+    if not (signup.user_id is None or user == signup.user_id or user == game_session.owner_id):
+        abort(403, "You are not allowed to edit this user's signups")
+
+    # delete the signup (cascade to times/roles)
+    db(db.game_signups.id == signup_id).delete()
+
+    # if the user is still signed up, redirect them back, otherwise back to index
+    if db((db.game_signups.session_id == session_id)
+          & (db.game_signups.user_id == user.id)).count():
+        redirect(URL('sessions', session_id))
+    else:
+        redirect(URL('index'))
+
+
+@action('sessions/<session_id:int>/join', method=['GET', 'POST'])
 @action.uses(db, session, auth, url_signer.verify())
 def join_session(session_id):
     """after user confirm @ invite - verify join action, create signup, then redir to edit signup"""
-    user = get_user()  # may not exist if anonymous - check query for anonymous name
-    query = request.query
+    user = get_user()  # may not exist if anonymous - check form for anonymous name
+    query = request.forms
 
     # if user is not logged in and name is not passed to qstring, abort
     if not (user or query.get('name')):
@@ -176,6 +201,7 @@ def invite(invite_key):
         "existing_signup": existing_signup
     }
 
+
 @action('sessions/<session_id:int>/delete')
 @action.uses(db, session, auth)
 def delete_session(session_id=None):
@@ -186,6 +212,7 @@ def delete_session(session_id=None):
     db(db.game_sessions.id == session_id).delete()
 
     redirect(URL('index'))
+
 
 # ==== API ====
 @action('api/presets')
@@ -232,6 +259,7 @@ def api_create_session():
 
     return success({"id": session_id, "invite_key": invite_key})
 
+
 @action('api/sessions/<session_id:int>', method=['POST'])
 @action.uses(db, session, auth)
 def api_update_session(session_id=None):
@@ -265,6 +293,7 @@ def api_update_session(session_id=None):
                              rule_value=rule.value)
 
     return success({"id": session_id})
+
 
 @action('api/sessions/<session_id:int>', method=['GET'])
 @action.uses(db, session, auth)
@@ -322,7 +351,6 @@ def api_update_signup(signup_id):
     return success({'id': signup_id})
 
 
-
 # ==== dev test ====
 # todo remove me
 @action('test/vue')
@@ -336,12 +364,14 @@ def test_vue():
 def test_vue_ajax():
     return success([{'n': 5}, {'n': 3}, {'n': 1}, {'n': 500}])
 
+
 @action('test/matchmaking/<session_id:int>')
 @action.uses(db)
 def test_matchmaking(session_id):
     signups = matchmaking.load_all_signups(db, session_id)
     signups = dummy.signups
     return success(matchmaking.find_timespans(signups))
+
 
 @action('test/matchmaking2')
 @action.uses(db)
