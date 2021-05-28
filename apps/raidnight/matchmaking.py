@@ -108,6 +108,7 @@ def find_timespans(signups):
 
     # sort by preference for people, then length - add a point if duration is greater than 3h
     # formula: score = people + sqrt(duration) / 1.2
+    # prefers weekend times (e.g. times in tne range 120-168 plus tz, so 113-168 + 0-8) to break ties
     # noinspection PyShadowingNames
     def scorer(item):
         start, stop, ids = item
@@ -117,7 +118,8 @@ def find_timespans(signups):
             duration = stop - start
         people = len(ids)
         duration_score = people + math.sqrt(duration) / 1.2
-        return people + duration_score
+        weekend_score = 1 if 112 <= start <= 168 or 0 <= start <= 8 else 0
+        return people + duration_score, weekend_score
 
     return sorted(out, key=scorer, reverse=True)
 
