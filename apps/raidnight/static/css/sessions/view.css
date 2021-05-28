@@ -1,0 +1,78 @@
+.calendar-header {
+    height: 24px;
+    text-align: center;
+}
+
+.calendar-left {
+    height: 12px;
+    margin-top: -1px;
+}
+
+.calendar-time-label {
+    margin-top: -12px;
+}
+
+.calendar-cell {
+    height: 12px;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    margin-top: -1px;
+    transition: all 0.25s linear;
+}
+
+.calendar-cell.selected-0 {
+    background-color: rgba(0, 255, 50, 0);
+}
+
+.calendar-cell.selected-1 {
+    background-color: rgba(0, 255, 50, 0.111);
+}
+
+.calendar-cell.selected-2 {
+    background-color: rgba(0, 255, 50, 0.222);
+}
+
+.calendar-cell.selected-3 {
+    background-color: rgba(0, 255, 50, 0.333);
+}
+
+.calendar-cell.selected-4 {
+    background-color: rgba(0, 255, 50, 0.444);
+}
+
+.calendar-cell.selected-5 {
+    background-color: rgba(0, 255, 50, 0.555);
+}
+
+.calendar-cell.selected-6 {
+    background-color: rgba(0, 255, 50, 0.666);
+}
+
+.calendar-cell.selected-7 {
+    background-color: rgba(0, 255, 50, 0.777);
+}
+
+.calendar-cell.selected-8 {
+    background-color: rgba(0, 255, 50, 0.888);
+}
+
+.calendar-cell.optimal {
+    background-color: rgba(0, 136, 255, 0.3);
+}
+
+/* cell styling: every cell controls its sides and bottom, top cell puts on a hat */
+.calendar-cell:first-child {
+    border-top: 1px solid white;
+}
+
+.calendar-cell:nth-child(odd) {
+    border-bottom: 1px dashed gray;
+}
+
+.calendar-cell:nth-child(even) {
+    border-bottom: 1px solid lightgray;
+}
+
+.calendar-cell:nth-child(8n+4) {
+    border-bottom: 1px solid white;
+}

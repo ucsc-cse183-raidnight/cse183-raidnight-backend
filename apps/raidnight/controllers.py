@@ -1,3 +1,5 @@
+import json
+
 from py4web import URL, abort, action, redirect, request
 from pydantic import ValidationError
 
@@ -87,7 +89,8 @@ def view_session(session_id):
         "signups": game_signups,
         "key": game_session.invite_key,
         "optimal": optimal,
-        "url_signer": url_signer
+        "url_signer": url_signer,
+        "json": json
     }
 
 
@@ -256,7 +259,13 @@ def api_create_session():
     invite_key = generate_invite_key()
     db.game_invites.insert(session_id=session_id, key=invite_key)
 
-    return success({"id": session_id, "invite_key": invite_key})
+    # and a signup for the owner
+    if user:
+        new_signup_id = db.game_signups.insert(session_id=session_id, user_id=user.id)
+    else:
+        new_signup_id = None
+
+    return success({"id": session_id, "invite_key": invite_key, "owner_signup_id": new_signup_id})
 
 
 @action('api/sessions/<session_id:int>', method=['POST'])
@@ -368,7 +377,6 @@ def test_vue_ajax():
 @action.uses(db)
 def test_matchmaking(session_id):
     signups = matchmaking.load_all_signups(db, session_id)
-    signups = dummy.signups
     return success(matchmaking.find_timespans(signups))
 
 

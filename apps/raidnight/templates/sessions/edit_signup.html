@@ -321,9 +321,9 @@
         // initialize selected array to given times
         this.times.forEach(time => {
           // calculate index
-          let tzDiff = differenceBetweenTz(this.timezone, time.timezone);
+          let tzDiff = differenceBetweenTz(this.timezone, time.timezone) * HALF_HOURS_PER_HOUR;
           let startIdx = Math.floor((time.offset * HALF_HOURS_PER_HOUR) + tzDiff);
-          let endIdx = startIdx + Math.ceil((time.duration * HALF_HOURS_PER_HOUR) + tzDiff);
+          let endIdx = startIdx + Math.ceil(time.duration * HALF_HOURS_PER_HOUR);
 
           for (let i = startIdx; i < endIdx; i++) {
             // mod to keep it to bounds if idx passes week boundary
