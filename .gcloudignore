@@ -135,8 +135,9 @@ apps/_dashboard
 apps/_scaffold
 
 .idea/
-*/.service
-password.txt
 db/
 
 .DS_Store
+
+# ===== py4web internals ====
+!apps/.service/session.secret

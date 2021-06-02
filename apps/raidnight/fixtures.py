@@ -17,7 +17,7 @@ from py4web.utils.url_signer import URLSigner
 from . import config
 
 DB_FOLDER = os.path.join(os.path.dirname(__file__), '../../db')
-db = DAL('sqlite://dev.db', folder=DB_FOLDER, pool_size=1)  # todo
+db = DAL(config.DB_URI, folder=DB_FOLDER, pool_size=1, migrate=False, fake_migrate=False)
 session = Session(secret=config.SESSION_SECRET)
 url_signer = URLSigner(session)
 

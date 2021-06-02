@@ -1,5 +1,9 @@
 runtime: python38
 entrypoint: py4web run apps -H 0.0.0.0 -P $PORT -d none
 instance_class: F1
+
+env_variables:
+  PY4WEB_SERVICE_DB_URI: "sqlite:memory"
+
 includes:
   - secrets.yaml
