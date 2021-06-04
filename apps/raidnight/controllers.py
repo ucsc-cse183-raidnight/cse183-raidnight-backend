@@ -196,7 +196,8 @@ def invite(invite_key):
         "user": user,
         "url_signer": url_signer,
         "session": game_session,
-        "existing_signup": existing_signup
+        "existing_signup": existing_signup,
+        "invite_key": invite_key
     }
 
 

@@ -43,7 +43,7 @@
             [[else:]]
             <!-- otherwise join as anonymous or log in -->
             <p>
-              <a class="button is-info" href="[[=URL('auth/plugin/oauth2discord/login')]]">
+              <a class="button is-info" href="[[=URL('auth/plugin/oauth2discord/login', vars={'after': f'invite/{invite_key}'})]]">
                 <span class="icon is-small">
                   <i class="fab fa-discord"></i>
                 </span>
