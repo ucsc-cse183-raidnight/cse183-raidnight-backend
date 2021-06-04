@@ -3,7 +3,7 @@ import json
 from py4web import URL, abort, action, redirect, request
 from pydantic import ValidationError
 
-from . import dummy, matchmaking, presets, schemas
+from . import matchmaking, presets, schemas
 from .fixtures import auth, db, session, url_signer
 from .matchmaking import load_all_signups
 from .utils import error, generate_invite_key, get_game_session_full, get_game_signup_full, get_user, \
@@ -28,10 +28,6 @@ def index():
             if game_session.owner_id != user.id:  # if we own the session, it's already in owned_sessions
                 signed_up_sessions.append(game_session)
 
-        # # todo remove me: dummy data
-        # owned_sessions.append(dummy.session1)
-        # signed_up_sessions.append(dummy.session2)
-        # signed_up_sessions.append(dummy.full_session)
         sessions = owned_sessions + signed_up_sessions
         sessions = sorted(sessions, key=lambda s: s.id, reverse=True)
 
@@ -358,33 +354,32 @@ def api_update_signup(signup_id):
 
     return success({'id': signup_id})
 
-
 # ==== dev test ====
-# todo remove me
-@action('test/vue')
-@action.uses("test/vue2.html", db, session, auth)
-def test_vue():
-    user = get_user()
-    return {"user": user}
-
-
-@action('test/api/vue')
-def test_vue_ajax():
-    return success([{'n': 5}, {'n': 3}, {'n': 1}, {'n': 500}])
-
-
-@action('test/matchmaking/<session_id:int>')
-@action.uses(db)
-def test_matchmaking(session_id):
-    signups = matchmaking.load_all_signups(db, session_id)
-    return success(matchmaking.find_timespans(signups))
-
-
-@action('test/matchmaking2')
-@action.uses(db)
-def test_matchmaking2():
-    signups = get_game_signup_full()
-    session = get_game_session_full(db, 25)
-    solution = matchmaking.RoleSolver(session, signups).solve()
-    solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
-    return success(solution_list)
+# # todo remove me
+# @action('test/vue')
+# @action.uses("test/vue2.html", db, session, auth)
+# def test_vue():
+#     user = get_user()
+#     return {"user": user}
+#
+#
+# @action('test/api/vue')
+# def test_vue_ajax():
+#     return success([{'n': 5}, {'n': 3}, {'n': 1}, {'n': 500}])
+#
+#
+# @action('test/matchmaking/<session_id:int>')
+# @action.uses(db)
+# def test_matchmaking(session_id):
+#     signups = matchmaking.load_all_signups(db, session_id)
+#     return success(matchmaking.find_timespans(signups))
+#
+#
+# @action('test/matchmaking2')
+# @action.uses(db)
+# def test_matchmaking2():
+#     signups = get_game_signup_full()
+#     session = get_game_session_full(db, 25)
+#     solution = matchmaking.RoleSolver(session, signups).solve()
+#     solution_list = [{"username": signup.username, "role": role.name if role else None} for signup, role in solution]
+#     return success(solution_list)
