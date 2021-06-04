@@ -137,8 +137,8 @@ def delete_signup(session_id, signup_id):
     db(db.game_signups.id == signup_id).delete()
 
     # if the user is still signed up, redirect them back, otherwise back to index
-    if db((db.game_signups.session_id == session_id)
-          & (db.game_signups.user_id == user.id)).count():
+    if user and db((db.game_signups.session_id == session_id)
+                   & (db.game_signups.user_id == user.id)).count():
         redirect(URL('sessions', session_id))
     else:
         redirect(URL('index'))
