@@ -293,7 +293,7 @@ Look, it's easy to get lost in the code.
            if (response.data.data.owner_signup_id) {
              window.location.href = `[[=URL('sessions')]]/${response.data.data.id}/edit_signup/${response.data.data.owner_signup_id}`;
            } else {
-             window.location.href = `[[=URL('sessions')]]/invite/${response.data.data.invite_key}`;
+             window.location.href = `[[=URL('invite')]]/${response.data.data.invite_key}`;
            }
          })
          .catch(error => {
